@@ -21,7 +21,7 @@ export default defineComponent({
             await loginstore.dologin(loginObj);
 
             if (loginstore.isLoginState) {
-                router.push("/home");
+                router.push("/request");
             } else console.log("Login Fail");
         };
 

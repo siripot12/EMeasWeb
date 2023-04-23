@@ -14,11 +14,6 @@ const router = createRouter({
       component: LoginView
     },
     {
-      path: '/home',
-      name: 'home',
-      component: HomeView
-    },
-    {
       path: '/request',
       name: 'request',
       component: RequestView
@@ -26,21 +21,11 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next)=>{
+router.beforeEach((to, from)=>{
   //Hook login store
   const loginstore = useLoginStore();
-
-  if(to.name !== 'login'){next({path:'/login'})}
-  
-
-
-
-  else if(to.name === 'login')
-  {
-    if(loginstore.isLoginState) next({name: 'request'})
-    else if(!loginstore.isLoginState) next({name: 'login'})
-  }
-  else next(true);
+  if(to.name !== 'login' && !loginstore.isLoginState) return '/login';
+  else true;
 })
 
 export default router
