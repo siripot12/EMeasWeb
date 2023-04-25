@@ -7,6 +7,7 @@ import { onMounted } from 'vue';
 import { ref } from 'vue';
 import { useLoginStore } from './stores/loginStore';
 import { RouterView } from 'vue-router'
+import { useMasterStore } from './stores/masterStore';
 
 interface Istates{
   account: IUser
@@ -22,11 +23,13 @@ export default defineComponent({
     },
 
     setup(){
+        const masterStore = useMasterStore();
         let navbarState = ref<number>(0)
         const loginstore = useLoginStore()
 
-        onMounted(()=>{
-
+        onMounted(async ()=>{
+          await masterStore.fetchmaster();
+          //console.log(masterStore.mastervalue);
         });
 
         const fnHeaderClick = () =>{
