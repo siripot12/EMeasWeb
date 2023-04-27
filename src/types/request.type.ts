@@ -1,3 +1,10 @@
+import type { IAuthResp } from "./user.type";
+
+export interface IPartRegisterReq{
+    auth : IAuthResp;
+    partdetail : IRequest;
+}
+
 export interface IRequest{
     id : number;
     qrcode : string;

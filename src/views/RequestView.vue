@@ -6,6 +6,7 @@ import {defineComponent} from 'vue'
 import * as labs from "vuetify/labs/VDataTable";
 import RequestItemComponent from '../components/RequestItemComponent.vue';
 import RequestDetailComponent from "../components/RequestDetailComponent.vue";
+import { reactive } from 'vue';
 
 
 export default defineComponent({
@@ -16,11 +17,12 @@ export default defineComponent({
 },
     setup(){
         const masterstore = useMasterStore();
-
+        const isOpendialog = ref<boolean>(true);
+        
         const itemsPerPage:number = 99
-        const headers = 
+        const headers:any = 
         [
-            {title: 'Id', sortable: false, align: 'start', key:'id'},
+            {title: 'Item', sortable: false, align: 'start', key:'number'},
             {title: 'Mode', sortable: false, key: 'measuringMode'},
             {title: 'Date', sortable: false, key: 'dateTime'},
             {title: 'Round', sortable: false, key: 'round'},
@@ -30,17 +32,29 @@ export default defineComponent({
             // { title: 'Actions', key: 'actions', sortable: false },
         ]
         
-        const data: IRequest[] = 
+        const data: IRequest[] = reactive( 
         [
             {id: 1, qrcode:'123456s22', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 31), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
             {id: 2, qrcode:'123457ss', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 32), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
             {id: 3, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
             {id: 4, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'}
-        ]
+        ])
 
         let expanded = ref([])
 
+        const fnDialogClose = ()=>{
+            isOpendialog.value = false
+        }
+
+        const fnRegisterSubmit = (value:IRequest)=>{
+            data.push(value)
+            console.log(value);
+        }
+
         return{
+            isOpendialog,
+            fnDialogClose,
+            fnRegisterSubmit,
             masterstore,
             expanded,
             itemsPerPage,
@@ -68,8 +82,8 @@ export default defineComponent({
                 </v-toolbar>
 
                 <div style="display: flex; flex-direction: row-reverse;">
-                    <v-dialog max-width="800px">
-                        <template v-slot:activator="{ props }">
+                    <v-dialog max-width="800px" persistent v-model="isOpendialog">
+                        <template v-slot:activator="{ props }" >
                             <v-btn
                             color="primary"
                             dark
@@ -80,10 +94,9 @@ export default defineComponent({
                             </v-btn>
                         </template>
 
-                        <request-detail-component/>
+                        <request-detail-component @on-close="fnDialogClose" @on-submit="fnRegisterSubmit"/>
                     </v-dialog>
                 </div>
-                
             </template>
 
             <template v-slot:expanded-row="{ columns, item }">
@@ -99,6 +112,10 @@ export default defineComponent({
                         />
                     </td>
                 </tr>
+            </template>
+
+            <template v-slot:item.number="{index}">
+                {{index+1}}
             </template>
 
             <template v-slot:item.dateTime="{item}">

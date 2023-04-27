@@ -11,7 +11,9 @@ export default defineComponent({
         });
 
 
-        let loginObj = reactive<IUser>({...defaultIUser});
+        //let loginObj = reactive<IUser>({...defaultIUser});
+          let loginObj = reactive<IUser>({username:'admin', password:'1234'})
+
         //Use store.
         const loginstore = useLoginStore();
         //Use router

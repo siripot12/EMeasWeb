@@ -20,8 +20,8 @@ export const useLoginStore = defineStore('loginStore',
         async dologin(data:IUser){
             data = {...data, password:createMD5(data.password)}
             
-            this.isLoginState = true
-            return;
+            // this.isLoginState = true
+            // return;
             let response = await this.$axios.post<IUser, any>("/Authen/Dologin", data)
 
             this.isError = true
