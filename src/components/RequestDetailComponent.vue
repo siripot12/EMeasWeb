@@ -19,6 +19,7 @@ const defprops = {
 }
 
 
+
 export default defineComponent({
         
     props: defprops,
@@ -28,6 +29,9 @@ export default defineComponent({
         const loginstore = useLoginStore();
         const masterStore = useMasterStore();
 
+        var isOperationMode : 'add'|'edit';
+
+        var titel = ref<string>('');
         var isQrReadonly = ref<boolean>(false)
         var inQrcode = ref<string>('')
         var inDate = ref<Date>()
@@ -42,7 +46,7 @@ export default defineComponent({
         var inlot = ref<string>('');
         var inremark = ref<string>('')
 
-        var originaldata = {...props.data}
+        var originaldata:IRequest = {...props.data!}
         var editeddata = ref<IRequest>({...props.data!})
 
         //Rules
@@ -62,9 +66,16 @@ export default defineComponent({
 
         onMounted(()=>{
             if(props.data === undefined){
+                isOperationMode = 'add'
+                titel.value = "Request new item"
                 originaldata = {...defaultIRequest}
-                editeddata.value = {...defaultIRequest}
+                
                 inDate.value = new Date()
+            }
+            else{
+                isOperationMode = 'edit'
+                titel.value = "Edit item"
+                editeddata.value = {...originaldata}
             }
 
             initialUi();
@@ -89,6 +100,8 @@ export default defineComponent({
             injig.value = jignumber? jignumber:{...defaultMasterjignumber}
             inlot.value = originaldata.lotMachining? originaldata.lotMachining: '' 
             inremark.value = originaldata.remark? originaldata.remark:''
+
+            inQrcode.value = originaldata.qrcode;
         }
 
         const fnModeSelectChanged = ()=>{
@@ -98,7 +111,7 @@ export default defineComponent({
             }
             else 
             {
-                inQrcode.value = ''
+                inQrcode.value = editeddata.value.qrcode
                 isQrReadonly.value = false
             }
         }
@@ -138,6 +151,7 @@ export default defineComponent({
         }
 
         return{
+            titel,
             fnModeSelectChanged,
             fnQrgenerate,
             fndateTostring,
@@ -169,7 +183,7 @@ export default defineComponent({
         inDate(){this.editeddata = {...this.editeddata, dateTime:this.inDate!}; this.fnQrgenerate();},
         inmeasuremode(){
             this.editeddata = {...this.editeddata, measuringMode: this.inmeasuremode? this.inmeasuremode.id : 0}
-            this.fnModeSelectChanged();
+            this.fnModeSelectChanged()
         },
         inpartnumber(){this.editeddata = {...this.editeddata, partnumber: this.inpartnumber? this.inpartnumber.name : ''}; this.fnQrgenerate();},
         inpartname(){if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},     
@@ -187,7 +201,7 @@ export default defineComponent({
 <template>
     <v-card>
         <v-card-title>
-            <span class="text-h5">Request new item</span>
+            <span class="text-h5">{{titel}}</span>
         </v-card-title>
 
         <v-card-text>

@@ -16,9 +16,11 @@ export default defineComponent({
     RequestDetailComponent
 },
     setup(){
-        const masterstore = useMasterStore();
-        const isOpendialog = ref<boolean>(true);
-        
+        const masterstore = useMasterStore()
+        const isOpendialog = ref<boolean>(false)
+        const isOpenDeleteDialog = ref<boolean>(false)
+        const selectedData = ref<IRequest | undefined>()
+
         const itemsPerPage:number = 99
         const headers:any = 
         [
@@ -29,13 +31,13 @@ export default defineComponent({
             {title: 'Part number', sortable: false, key: 'partnumber'},
             {title: 'Part name', sortable: false, key: 'partname'},
             {title: 'Process', sortable: false, key: 'process'},
-            // { title: 'Actions', key: 'actions', sortable: false },
+            { title: 'Actions', key: 'actions', sortable: false },
         ]
         
         const data: IRequest[] = reactive( 
         [
-            {id: 1, qrcode:'123456s22', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 31), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
-            {id: 2, qrcode:'123457ss', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 32), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
+            {id: 1, qrcode:'123456s22', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 31), partnumber:'SM0000-0002', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
+            {id: 2, qrcode:'123457ss', measuringMode: 2, dateTime: new Date(2023, 12, 24, 10, 33, 32), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
             {id: 3, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
             {id: 4, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'}
         ])
@@ -51,10 +53,29 @@ export default defineComponent({
             console.log(value);
         }
 
+        const fnAdd = ()=>{
+            selectedData.value = undefined
+            isOpendialog.value = true
+        }
+
+        const fnEdit = (item:IRequest)=>{
+            selectedData.value = {...item}
+            isOpendialog.value = true
+        }
+
+        const fnDelete = (item:IRequest)=>{
+            let a = data.indexOf(item);
+            console.log(a);
+        }
+
         return{
             isOpendialog,
             fnDialogClose,
             fnRegisterSubmit,
+            fnAdd,
+            fnEdit,
+            fnDelete,
+            selectedData,
             masterstore,
             expanded,
             itemsPerPage,
@@ -89,12 +110,13 @@ export default defineComponent({
                             dark
                             class="mt-2 mb-2"
                             v-bind="props"
+                            @click="fnAdd"
                             >
                                 New Item
                             </v-btn>
                         </template>
 
-                        <request-detail-component @on-close="fnDialogClose" @on-submit="fnRegisterSubmit"/>
+                        <request-detail-component :data="selectedData" @on-close="fnDialogClose" @on-submit="fnRegisterSubmit"/>
                     </v-dialog>
                 </div>
             </template>
@@ -141,26 +163,28 @@ export default defineComponent({
 
 
 
-            <!-- <template v-slot:item.actions="{ item }">
-            <v-icon
-                icon="edit"
-                size="small"
-                class="me-2"
-            >
-            </v-icon>
-            <v-icon
-                icon="delete"
-                size="small"
-            >
-            </v-icon>
+            <template v-slot:item.actions="{ item }">
+                <v-icon
+                    icon="edit"
+                    size="small"
+                    class="me-2"
+                    @click="fnEdit(item.raw)"
+                >
+                </v-icon>
+                <v-icon
+                    icon="delete"
+                    size="small"
+                    @click="fnDelete(item.raw)"
+                >
+                </v-icon>
+                </template>
+                <template v-slot:no-data>
+                <v-btn
+                    color="primary"
+                >
+                    Reset
+                </v-btn>
             </template>
-            <template v-slot:no-data>
-            <v-btn
-                color="primary"
-            >
-                Reset
-            </v-btn>
-            </template> -->
 
         </v-data-table>
     </div>
