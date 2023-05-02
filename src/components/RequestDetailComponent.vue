@@ -7,12 +7,16 @@ import { onMounted } from 'vue';
 import { useMasterStore } from '@/stores/masterStore';
 import moment from "moment";
 
-import type { MasterMeasureMode, MasterPartnumber, MasterPartName, MasterProcessName, MasterItemNumber, MasterRound, MasterMachineName, MasterJigNumber,  } from "@/types/master.type";
-import { defaultIMasterMeasureMode, defaultMasterpartnumber, defaultMasterPartname, defaultMasterProcessname,  defaultMasterItemnumber, defaultMasterround, defaultMastermachinename, defaultMasterjignumber} from "@/types/master.type";
+import type { MasterMeasureMode, MasterPartnumber, MasterPartName, MasterProcessName, MasterItemNumber, MasterRound, MasterMachineName, MasterJigNumber,  MasterTrayNumber} from "@/types/master.type";
+import { defaultIMasterMeasureMode, defaultMasterpartnumber, defaultMasterPartname, defaultMasterProcessname,  defaultMasterItemnumber, defaultMasterround, defaultMastermachinename, defaultMasterjignumber, defaultMastertraynumber} from "@/types/master.type";
 import { watch } from 'vue';
 import { useLoginStore } from '@/stores/loginStore';
 import { inject } from 'vue';
 import type { AxiosStatic } from 'axios';
+
+import {confirmation, alert, success} from "@/components/sweetalert/sweetalert";
+
+
 const defprops = {
     data: Object as PropType<IRequest>,
     mode: Number,
@@ -20,12 +24,14 @@ const defprops = {
 
 
 
+
 export default defineComponent({
-        
+
     props: defprops,
-    emits:['onSubmit', 'onClose'],
+    emits:['onAdd', 'onEdit', 'onClose'],
     setup(props,{emit}){
         const axios = inject<AxiosStatic>('$axios')
+
         const loginstore = useLoginStore();
         const masterStore = useMasterStore();
 
@@ -45,6 +51,7 @@ export default defineComponent({
         var injig = ref<MasterJigNumber>({...defaultMasterjignumber});
         var inlot = ref<string>('');
         var inremark = ref<string>('')
+        var intraynumber = ref<MasterTrayNumber>({...defaultMastertraynumber})
 
         var originaldata:IRequest = {...props.data!}
         var editeddata = ref<IRequest>({...props.data!})
@@ -65,16 +72,19 @@ export default defineComponent({
         }
 
         onMounted(()=>{
-            if(props.data === undefined){
+            if(props.data === undefined || props.data.id === 0){
                 isOperationMode = 'add'
                 titel.value = "Request new item"
-                originaldata = {...defaultIRequest}
+                originaldata = props.data? {...props.data, itemnumber:props.data.itemnumber+1} : {...defaultIRequest}
                 
                 inDate.value = new Date()
             }
             else{
                 isOperationMode = 'edit'
                 titel.value = "Edit item"
+                inDate.value = originaldata.dateTime;
+                //Memmory scanned qrcode.
+                scannedQrcode.value = originaldata.qrcode
                 editeddata.value = {...originaldata}
             }
 
@@ -98,20 +108,24 @@ export default defineComponent({
             inmachinenumber.value = machinename? machinename:{...defaultMastermachinename}
             const jignumber = masterStore.mastervalue?.jignumber.find(e=>e.value == originaldata.jignumber)
             injig.value = jignumber? jignumber:{...defaultMasterjignumber}
-            inlot.value = originaldata.lotMachining? originaldata.lotMachining: '' 
+            const traynumber = masterStore.mastervalue?.traynumber.find(e=>e.value == originaldata.traynumber)
+            intraynumber.value = traynumber? traynumber:{...defaultMastertraynumber}
+
+            inlot.value = originaldata.lotMachining? originaldata.lotMachining: ''
             inremark.value = originaldata.remark? originaldata.remark:''
 
             inQrcode.value = originaldata.qrcode;
         }
 
+        let scannedQrcode = ref<string>('')
         const fnModeSelectChanged = ()=>{
             if(inmeasuremode.value.id == 1) {
                 fnQrgenerate()
                 isQrReadonly.value = true
             }
-            else 
+            else
             {
-                inQrcode.value = editeddata.value.qrcode
+                inQrcode.value = scannedQrcode.value
                 isQrReadonly.value = false
             }
         }
@@ -130,24 +144,51 @@ export default defineComponent({
             let qrcode = `${moment(editeddata.value.dateTime).format("DDMMYYYYhhmmss") + zeroPad(editeddata.value.partname,3)
             + zeroPad(editeddata.value.process,5) + zeroPad(editeddata.value.measuringMode,2) + zeroPad(editeddata.value.machinenumber,2)
             + zeroPad(editeddata.value.jignumber,2)}`
-            
+
             inQrcode.value = qrcode;
             return qrcode
         }
 
-        const fnSendData = async():Promise<IRequest>=>{
+        const fnSendAddData = async():Promise<any>=>{
             let data:IPartRegisterReq = {auth: {...loginstore.userdata!}, partdetail: {...editeddata.value}}
-            let res = await axios?.post<IPartRegisterReq, any>("/PartRegister/Partregist", data,{headers:{Accept:'application/json', "Content-Type":'application/json'}})
-            return res.data!
+            console.log(data)
+            let res = await axios?.post<IPartRegisterReq, any>("/PartRegister/ItemAdd", data,{headers:{Accept:'application/json', "Content-Type":'application/json'}})
+            .catch((error)=>{
+                return {status:error.response.status, data:error.response.data}
+            })
+
+            return res
+        }
+
+        const fnSendEditData = async():Promise<any>=>{
+            let data:IPartRegisterReq = {auth: {...loginstore.userdata!}, partdetail: {...editeddata.value}}
+            let res = await axios?.put<IPartRegisterReq, any>("/PartRegister/Itemedit", data,{headers:{Accept:'application/json', "Content-Type":'application/json'}})
+            .catch((error)=>{
+                return {status:error.response.status, data:error.response.data}
+            })
+            return res
         }
 
         const fnclick = async()=>{
-            const res = await fnSendData()
-            emit('onSubmit', res)
+            let res:any
+            if(isOperationMode === 'add') res = await fnSendAddData()
+            else if(isOperationMode === 'edit') res = await fnSendEditData()
+
+            if(res.status == 200){
+                if(isOperationMode == 'add') emit('onAdd', res.data)
+                else if(isOperationMode == 'edit') emit('onEdit', res.data)
+                await success('Success', 'Request item successfully to add/edit.')
+            }
+            else{
+                await alert('Fail', `Code : ${res.status} Message : ${res.data}`)
+            }
         }
 
-        const fncancle = ()=>{
-            emit('onClose')
+        const fncancle = async()=>{
+            const res = await confirmation('Confirmation' ,'Do you want to cancle this registration?')
+            if(res.isconfirm){
+                emit('onClose')
+            }
         }
 
         return{
@@ -160,6 +201,7 @@ export default defineComponent({
             isQrReadonly,
             editeddata,
             masterStore,
+            scannedQrcode,
             inQrcode,
             inDate,
             inmeasuremode,
@@ -172,6 +214,7 @@ export default defineComponent({
             injig,
             inlot,
             inremark,
+            intraynumber,
             valid,
             required,
             requiredcombobox,
@@ -179,14 +222,18 @@ export default defineComponent({
         }
     },
     watch:{
-        inQrcode(){this.editeddata = {...this.editeddata, qrcode:this.inQrcode}},
+        inQrcode(){
+            this.editeddata = {...this.editeddata, qrcode:this.inQrcode};
+            //If manual mode no selected load input qr code to memory.
+            if(this.inmeasuremode.id != 1) this.scannedQrcode = this.inQrcode!
+        },
         inDate(){this.editeddata = {...this.editeddata, dateTime:this.inDate!}; this.fnQrgenerate();},
         inmeasuremode(){
             this.editeddata = {...this.editeddata, measuringMode: this.inmeasuremode? this.inmeasuremode.id : 0}
             this.fnModeSelectChanged()
         },
         inpartnumber(){this.editeddata = {...this.editeddata, partnumber: this.inpartnumber? this.inpartnumber.name : ''}; this.fnQrgenerate();},
-        inpartname(){if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},     
+        inpartname(){if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},
         inprocess(){if(typeof this.inprocess === 'string') return; this.editeddata = {...this.editeddata, process: this.inprocess? this.inprocess.id:0}; this.fnQrgenerate();},
         initemnumber(){if(typeof this.initemnumber === 'string') return; this.editeddata = {...this.editeddata, itemnumber: this.initemnumber? this.initemnumber.value:0}; this.fnQrgenerate();},
         inmachinenumber(){if(typeof this.inmachinenumber === 'string') return; this.editeddata = {...this.editeddata, machinenumber: this.inmachinenumber? this.inmachinenumber.id:0}; this.fnQrgenerate();},
@@ -194,6 +241,7 @@ export default defineComponent({
         injig(){if(typeof this.injig === 'string') return; this.editeddata = {...this.editeddata, jignumber: this.injig? this.injig.value:0}; this.fnQrgenerate();},
         inlot(){this.editeddata = {...this.editeddata, lotMachining:this.inlot}},
         inremark(){this.editeddata = {...this.editeddata, remark:this.inremark}},
+        intraynumber(){if(typeof this.intraynumber === 'string') return; this.editeddata = {...this.editeddata, traynumber: this.intraynumber? this.intraynumber.id:0};}
     }
 })
 </script>
@@ -294,8 +342,8 @@ export default defineComponent({
                             variant="solo"
                             :rules="[requiredcombobox]"
                         ></v-combobox>
-                    </v-col> 
-                    
+                    </v-col>
+
                     <v-col cols="3" class="colcontainer">
                         <v-combobox
                             label="Round"
@@ -327,6 +375,20 @@ export default defineComponent({
                             item-title="name"
                             item-value="id"
                             v-model="injig"
+                            variant="solo"
+                            :rules="[requiredcombobox]"
+                        ></v-combobox>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col cols="3" class="colcontainer">
+                        <v-combobox
+                            label="Tray number"
+                            :items="masterStore.mastervalue?.traynumber"
+                            item-title="name"
+                            item-value="id"
+                            v-model="intraynumber"
                             variant="solo"
                             :rules="[requiredcombobox]"
                         ></v-combobox>

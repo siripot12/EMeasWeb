@@ -8,8 +8,8 @@ const defprops = {
         default:'',
         required : true
     },
-    itemnumber:{
-        type:Number,
+    datetime:{
+        type:String,
         default:'',
         required : true
     },
@@ -49,8 +49,8 @@ export default defineComponent({
 
 <template>
     <div class="containermain">
+        <ValueDisplayComponent class="ma-2" header="DateTime" :value="props.datetime"/>
         <ValueDisplayComponent class="ma-2" header="QR code" :value="props.qrcode"/>
-        <ValueDisplayComponent class="ma-2" header="Item number" :value="props.itemnumber.toString()"/>
         <ValueDisplayComponent class="ma-2" header="Machine number" :value="props.machinenumber.toString()"/>
         <ValueDisplayComponent class="ma-2" header="Jig number" :value="props.jignumber.toString()"/>
         <ValueDisplayComponent class="ma-2" header="Lot" :value="props.lot"/>

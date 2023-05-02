@@ -19,6 +19,7 @@ export interface IRequest{
     jignumber : number;
     lotMachining : string;
     remark: string;
+    traynumber: number;
 }
 
 export const defaultIRequest:IRequest = {
@@ -34,5 +35,6 @@ export const defaultIRequest:IRequest = {
     machinenumber : 1,
     jignumber : 1,
     lotMachining : '',
-    remark : ''
+    remark : '',
+    traynumber : 1
 }

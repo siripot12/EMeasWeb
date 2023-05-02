@@ -1,13 +1,16 @@
 <script lang="ts">
 import { useMasterStore } from '@/stores/masterStore';
 import type { IRequest } from '@/types/request.type';
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import {defineComponent} from 'vue'
 import * as labs from "vuetify/labs/VDataTable";
 import RequestItemComponent from '../components/RequestItemComponent.vue';
 import RequestDetailComponent from "../components/RequestDetailComponent.vue";
 import { reactive } from 'vue';
 
+import { confirmation, alert, success } from "@/components/sweetalert/sweetalert";
+import type { AxiosStatic } from 'axios';
+import { useLoginStore } from '@/stores/loginStore';
 
 export default defineComponent({
     components:{
@@ -16,65 +19,107 @@ export default defineComponent({
     RequestDetailComponent
 },
     setup(){
+        const axios = inject<AxiosStatic>('$axios')
+        const loginstore = useLoginStore()
         const masterstore = useMasterStore()
+
         const isOpendialog = ref<boolean>(false)
-        const isOpenDeleteDialog = ref<boolean>(false)
         const selectedData = ref<IRequest | undefined>()
 
         const itemsPerPage:number = 99
-        const headers:any = 
+        const headers:any =
         [
             {title: 'Item', sortable: false, align: 'start', key:'number'},
             {title: 'Mode', sortable: false, key: 'measuringMode'},
-            {title: 'Date', sortable: false, key: 'dateTime'},
+            {title: 'Item number', sortable: false, key: 'itmnumber'},
             {title: 'Round', sortable: false, key: 'round'},
+            {title: 'Tray number', sortable: false, key: 'traynumber'},
             {title: 'Part number', sortable: false, key: 'partnumber'},
             {title: 'Part name', sortable: false, key: 'partname'},
             {title: 'Process', sortable: false, key: 'process'},
             { title: 'Actions', key: 'actions', sortable: false },
         ]
-        
-        const data: IRequest[] = reactive( 
-        [
-            {id: 1, qrcode:'123456s22', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 31), partnumber:'SM0000-0002', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
-            {id: 2, qrcode:'123457ss', measuringMode: 2, dateTime: new Date(2023, 12, 24, 10, 33, 32), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
-            {id: 3, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'},
-            {id: 4, qrcode:'123458', measuringMode: 1, dateTime: new Date(2023, 12, 24, 10, 33, 33), partnumber:'SM0000-0001', partname: 1, process: 1, itemnumber: 1, round: 1, machinenumber: 1, jignumber: 1, lotMachining: 'lot', remark:'mark'}
-        ])
 
+        var data: IRequest[] = reactive([])
         let expanded = ref([])
+
+        onMounted(async()=>{
+            //Get reguster items from API by login id.
+            const res = await axios?.get<string,any>(`/PartRegister/ItemsReadByRequesterId?req=${loginstore.userdata?.employeeno}`).catch((error)=>{
+                alert('Fail', `Code : ${res.status} Message : ${res.data}`)
+            })
+
+            if(res.status === 200)
+            {
+                const items = res.data as IRequest[]
+                items.map(x=>data.push(x))
+            }
+        })
 
         const fnDialogClose = ()=>{
             isOpendialog.value = false
         }
 
-        const fnRegisterSubmit = (value:IRequest)=>{
+        const fnRegisterAdd = (value:IRequest)=>{
             data.push(value)
-            console.log(value);
+            fnDialogClose();
         }
 
-        const fnAdd = ()=>{
+        const dataEditItem = (item:IRequest)=>{
+            let editIndex = data.findIndex(a=>a.id === item.id)
+            if(editIndex > -1){
+                data[editIndex] = {...item}
+                fnDialogClose();
+            }
+        }
+
+        const dataDeleteItem = (item:IRequest)=>{
+            let deleteIndex = data.indexOf(item);
+            if(deleteIndex > -1){
+                data.splice(deleteIndex, 1)
+            }
+        }
+
+        const fnClickAdd = ()=>{
             selectedData.value = undefined
             isOpendialog.value = true
         }
 
-        const fnEdit = (item:IRequest)=>{
+        const fnClickEdit = (item:IRequest)=>{
+            //Load object to selected item.
             selectedData.value = {...item}
             isOpendialog.value = true
         }
 
-        const fnDelete = (item:IRequest)=>{
-            let a = data.indexOf(item);
-            console.log(a);
+        const fnClickCopy = (item:IRequest)=>{
+            selectedData.value = {...item}
+            selectedData.value.id = 0
+            isOpendialog.value = true
+        }
+
+        const fnClickDelete = async(item:IRequest)=>{
+            const res = await confirmation('Confirmation' ,'Do you want to delete this item?')
+            if(res.isconfirm){
+                const res = await axios?.delete<number,any>(`/PartRegister/Itemdelete?itemid=${item.id}`).catch((error)=>{
+                    alert('Fail', `Code : ${res.status} Message : ${res.data}`)
+                })
+
+                if(res.status === 200){
+                    dataDeleteItem(item)
+                    await success('Success', 'Request item successfully to remove.')
+                }
+            }
         }
 
         return{
             isOpendialog,
             fnDialogClose,
-            fnRegisterSubmit,
-            fnAdd,
-            fnEdit,
-            fnDelete,
+            fnRegisterAdd,
+            fnClickAdd,
+            fnClickEdit,
+            fnClickCopy,
+            fnClickDelete,
+            dataEditItem,
             selectedData,
             masterstore,
             expanded,
@@ -99,26 +144,41 @@ export default defineComponent({
         >
             <template v-slot:top>
                 <v-toolbar flat>
-                    <v-toolbar-title>Requestion Table</v-toolbar-title>
+                    <v-toolbar-title>
+                        <div style="display: flex; flex-direction: row; justify-content: center; color: #555b6e;">
+                            <v-icon icon="schedule_send" class="mr-3"></v-icon>
+                            <b style="display: block; text-align: center;">
+                                Requestion Table
+                            </b>
+                        </div>
+                    </v-toolbar-title>
                 </v-toolbar>
 
-                <div style="display: flex; flex-direction: row-reverse;">
-                    <v-dialog max-width="800px" persistent v-model="isOpendialog">
-                        <template v-slot:activator="{ props }" >
-                            <v-btn
-                            color="primary"
-                            dark
-                            class="mt-2 mb-2"
-                            v-bind="props"
-                            @click="fnAdd"
-                            >
-                                New Item
-                            </v-btn>
-                        </template>
-
-                        <request-detail-component :data="selectedData" @on-close="fnDialogClose" @on-submit="fnRegisterSubmit"/>
-                    </v-dialog>
+                <div style="display: flex; flex-direction: column;">
+                    <v-divider></v-divider>
+                    <div style="display: flex; flex-direction: row-reverse;">
+                        <v-dialog max-width="850px" persistent v-model="isOpendialog">
+                            <template v-slot:activator="{ props }" >
+                                <v-btn
+                                color="primary"
+                                dark
+                                class="mt-2 mb-2 mr-2"
+                                v-bind="props"
+                                @click="fnClickAdd"
+                                prepend-icon="add"
+                                >
+                                    <template v-slot:prepend>
+                                        <v-icon color="red"></v-icon>
+                                    </template>
+                                    Add New Item
+                                </v-btn>
+                            </template>
+                            <request-detail-component :data="selectedData" @on-close="fnDialogClose" @on-add="fnRegisterAdd" @on-edit="dataEditItem"/>
+                        </v-dialog>
+                    </div>
+                    <v-divider></v-divider>
                 </div>
+                
             </template>
 
             <template v-slot:expanded-row="{ columns, item }">
@@ -126,7 +186,7 @@ export default defineComponent({
                     <td :colspan="columns.length">
                         <request-item-component
                             :qrcode="item.raw.qrcode"
-                            :itemnumber="item.raw.itemnumber"
+                            :datetime="masterstore.getdatetimetext(item.raw.dateTime)"
                             :machinenumber="masterstore.getmachinenumberbyindex(item.raw.machinenumber)"
                             :jignumber="item.raw.jignumber"
                             :lot="item.raw.lotMachining"
@@ -140,8 +200,8 @@ export default defineComponent({
                 {{index+1}}
             </template>
 
-            <template v-slot:item.dateTime="{item}">
-                {{masterstore.getdatetimetext(item.raw.dateTime)}}
+            <template v-slot:item.itmnumber="{item}">
+                {{ masterstore.getitemnumberbyvalue(item.raw.itemnumber) }}
             </template>
 
             <template v-slot:item.partname="{item}">
@@ -160,35 +220,43 @@ export default defineComponent({
                 {{masterstore.getroundtext(item.raw.round)}}
             </template>
 
+            <template v-slot:item.traynumber="{item}">
+                {{masterstore.gettraynumberbyvalue(item.raw.round)}}
+            </template>
+
 
 
 
             <template v-slot:item.actions="{ item }">
-                <v-icon
-                    icon="edit"
+                <div style="display: flex; align-items: center;">
+                    <v-icon
+                    icon="file_copy"
                     size="small"
-                    class="me-2"
-                    @click="fnEdit(item.raw)"
-                >
-                </v-icon>
-                <v-icon
-                    icon="delete"
-                    size="small"
-                    @click="fnDelete(item.raw)"
-                >
-                </v-icon>
-                </template>
-                <template v-slot:no-data>
-                <v-btn
-                    color="primary"
-                >
-                    Reset
-                </v-btn>
+                    color="green"
+                    @click="fnClickCopy(item.raw)"
+                    >
+                    </v-icon>
+                    <v-divider vertical class="ml-2 mr-2"></v-divider>
+                    <v-icon
+                        icon="edit"
+                        size="small"
+                        color="orange"
+                        @click="fnClickEdit(item.raw)"
+                    >
+                    </v-icon>
+                    <v-divider vertical class="ml-2 mr-2"></v-divider>
+                    <v-icon
+                        icon="delete"
+                        size="small"
+                        color="red"
+                        @click="fnClickDelete(item.raw)"
+                    >
+                    </v-icon>
+                </div>
             </template>
-
         </v-data-table>
     </div>
-    
+
     <!-- <div class="container">
         <template>
             <v-data-table
@@ -211,6 +279,9 @@ export default defineComponent({
         width: 99vw;
         height: 96vh;
         background-color: white;
+    }
+    ::v-deep .v-toolbar__content{
+        background: #96e072;
     }
 
     table thead th {

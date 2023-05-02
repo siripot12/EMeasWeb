@@ -15,6 +15,9 @@ import axios, { Axios } from 'axios'
 import VueAxios from "vue-axios";
 import './assets/main.css'
 
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 //Vuetify global styles
 const vuetify = createVuetify({
     theme:{
@@ -60,7 +63,7 @@ const app = createApp(App)
 app.use(vuetify)
 app.use(router)
 
-axios.defaults.baseURL = 'http://192.168.1.29:7118/api';
+axios.defaults.baseURL = 'http://localhost:7118/api';
 //app.use(VueAxios, axios);
 
 //Add axios to global instance for composition api usage.

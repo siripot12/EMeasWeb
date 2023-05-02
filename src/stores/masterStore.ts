@@ -62,6 +62,10 @@ export const useMasterStore = defineStore('masterStore',
         getjigbyvalue(value:number):string{
             let obj = this.mastervalue?.jignumber.find(e=>e.value == value)
             return obj != undefined? obj.name:'-'
+        },
+        gettraynumberbyvalue(value:number):string{
+            let obj = this.mastervalue?.traynumber.find(e=>e.value == value)
+            return obj != undefined? obj.name:'-'
         }
 
     },

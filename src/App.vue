@@ -46,7 +46,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-layout class="container">
+  <v-layout class="container-app-main">
     <div v-if="loginstore.isLoginState === true">
       <header-component title="Web application" @on-click="fnHeaderClick"/>
       <navbar-component :navbarstate="navbarState"/>
@@ -58,10 +58,14 @@ export default defineComponent({
   </v-layout>
 </template>
 
-<style scoped>
-  .container{
+<style >
+  .container-app-main{
     box-sizing: border-box;
     width: 100vw;
     height: 100vh;
   }
+
+  .swal2-container{
+        z-index: 10000 !important;
+    }
 </style>

@@ -88,6 +88,18 @@ export const defaultMasterjignumber:MasterJigNumber = {
     name : ''
 }
 
+export interface MasterTrayNumber{
+    id : number;
+    value : number;
+    name : string;
+}
+
+export const defaultMastertraynumber:MasterTrayNumber = {
+    id : 0,
+    value : 0,
+    name : ''
+}
+
 export interface AllMasterResp{
     measuremode : MasterMeasureMode[];
     partnumber : MasterPartnumber[];
@@ -97,4 +109,5 @@ export interface AllMasterResp{
     machinename : MasterMachineName[];
     jignumber: MasterJigNumber[];
     round : MasterRound[];
+    traynumber : MasterTrayNumber[];
 }
