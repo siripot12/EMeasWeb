@@ -3,7 +3,7 @@ export interface IUser{
     password : string;
 }
 
-export const defaultIUser:IUser = 
+export const defaultIUser:IUser =
 {
     username : "",
     password : ""
@@ -20,7 +20,7 @@ export interface IAuthResp{
     nicenet : number;
 }
 
-export const defaultIAuthResp: IAuthResp = 
+export const defaultIAuthResp: IAuthResp =
 {
     username : "",
     authlevel : 0,

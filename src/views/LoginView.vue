@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, inject } from "vue";
 import { useLoginStore } from "../stores/loginStore";
-import { defaultIUser, type IUser } from "@/types/user.type";
+import type { IUser } from "@/types/user.type";
 import { useRouter } from "vue-router";
 import { onMounted } from "vue";
 
