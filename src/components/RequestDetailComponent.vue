@@ -76,7 +76,6 @@ export default defineComponent({
                 isOperationMode = 'add'
                 titel.value = "Request new item"
                 originaldata = props.data? {...props.data, itemnumber:props.data.itemnumber+1} : {...defaultIRequest}
-                
                 inDate.value = new Date()
             }
             else{
@@ -151,7 +150,7 @@ export default defineComponent({
 
         const fnSendAddData = async():Promise<any>=>{
             let data:IPartRegisterReq = {auth: {...loginstore.userdata!}, partdetail: {...editeddata.value}}
-            console.log(data)
+            data.partdetail.state = 1;
             let res = await axios?.post<IPartRegisterReq, any>("/PartRegister/ItemAdd", data,{headers:{Accept:'application/json', "Content-Type":'application/json'}})
             .catch((error)=>{
                 return {status:error.response.status, data:error.response.data}

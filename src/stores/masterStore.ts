@@ -1,4 +1,4 @@
-import type { AllMasterResp } from "@/types/master.type";
+import type { AllMasterResp, MasterMeasInstrument } from "@/types/master.type";
 import { defineStore } from "pinia";
 import moment from "moment";
 
@@ -13,8 +13,11 @@ export const useMasterStore = defineStore('masterStore',
     },
     actions:{
         async fetchmaster(){
-            let response = await this.$axios.get("/Master/GetAllMaster")
-            this.isError = true
+            this.isError = false;
+            let response = await this.$axios.get("/Master/GetAllMaster").catch(()=>{
+                this.isError = true
+            })
+            if(this.isError) { return;}
             
             if(response != null){
                const resstatus = response.status as number;
@@ -26,6 +29,23 @@ export const useMasterStore = defineStore('masterStore',
                     this.isError = false
                }
             }
+
+            //Fetching master measurement instrument.
+            let response2 = await this.$axios.get("/Master/GetMasterMeasureIns").catch(()=>{
+                this.isError = true
+            })
+            if(this.isError) { return;}
+
+            if(response2 != null){
+                const resstatus = response2.status as number;
+                if(resstatus === 200)
+                {
+                     const resdata = response2.data as MasterMeasInstrument[];
+                     this.mastervalue = {...this.mastervalue, measinstrument :resdata} as AllMasterResp;
+                     this.isSuccess = true
+                     this.isError = false
+                }
+             }
         },
 
         //Methods for get name by index.

@@ -65,15 +65,15 @@ export const defaultMasterround : MasterRound = {
 export interface MasterMachineName{
     id : number;
     name : string;
-    partname : number;
-    processname : number;
+    partName : number;
+    processName : number;
 }
 
 export const defaultMastermachinename:MasterMachineName = {
     id : 0,
     name : '',
-    partname : 0,
-    processname : 0
+    partName : 0,
+    processName : 0
 }
 
 export interface MasterJigNumber{
@@ -100,6 +100,38 @@ export const defaultMastertraynumber:MasterTrayNumber = {
     name : ''
 }
 
+export interface MasterMeasInstrument{
+    id: number,
+    datano:number,
+    partId:number,
+    procId:number,
+    measuringId:number,
+    programGroup:number,
+    upperStd:number,
+    lowerStd:number,
+    dataline:number,
+    dataposition:number,
+    filename:String,
+    seqname:String,
+    name:String
+}
+
+export const defaultMasterMeasInstrument: MasterMeasInstrument = {
+    id : 0,
+    datano : 0,
+    partId : 0,
+    procId : 0,
+    measuringId : 0,
+    programGroup : 0,
+    upperStd : 0,
+    lowerStd : 0,
+    dataline : 0,
+    dataposition : 0,
+    filename : '',
+    seqname : '',
+    name : ''
+}
+
 export interface AllMasterResp{
     measuremode : MasterMeasureMode[];
     partnumber : MasterPartnumber[];
@@ -110,4 +142,5 @@ export interface AllMasterResp{
     jignumber: MasterJigNumber[];
     round : MasterRound[];
     traynumber : MasterTrayNumber[];
+    measinstrument: MasterMeasInstrument[];
 }

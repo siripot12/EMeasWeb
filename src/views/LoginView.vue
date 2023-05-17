@@ -23,7 +23,7 @@ export default defineComponent({
             await loginstore.dologin(loginObj);
 
             if (loginstore.isLoginState) {
-                router.push("/request");
+                router.push("/dashboard");
             } else console.log("Login Fail");
         };
 

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
 import LoginView from "@/views/LoginView.vue";
 import RequestView from "@/views/RequestView.vue";
+import DashboardView from '@/views/DashboardView.vue';
 import { useLoginStore } from '@/stores/loginStore';
 
 
@@ -17,6 +17,11 @@ const router = createRouter({
       path: '/request',
       name: 'request',
       component: RequestView
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardView
     }
   ]
 })

@@ -15,13 +15,20 @@ export default defineComponent({
         const loginStore = useLoginStore();
 
         let drawer = ref<boolean>(false)
-
-        const fnGotoHomeView = () =>{
-            router.push('/home')
+        var drawerstate:boolean = false;
+        
+        const onClickoutside = ()=>{
+            if(!drawer.value) return;
+            setInterval(()=>{ drawerstate = drawer.value},200)
+            if(drawerstate) drawer.value = false;
         }
 
-        const fnGotoAboutView = ()=>{
-            router.push('/about')
+        const fnGotoRequestView = () =>{
+            router.push('/request')
+        }
+
+        const fnGotoDashboardView = ()=>{
+            router.push('/dashboard')
         }
 
         const fnLogOut = ()=>{
@@ -32,17 +39,19 @@ export default defineComponent({
         return{
             loginStore,
             drawer,
-            fnGotoHomeView,
-            fnGotoAboutView,
-            fnLogOut
+            fnGotoRequestView,
+            fnGotoDashboardView,
+            fnLogOut,
+            onClickoutside
         }
     }
 })
 </script>
 
 <template>
+    <!-- image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg" -->
     <v-navigation-drawer 
-        image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg"
+        background-color="secondary"
         v-model="drawer"
         temporary
     >
@@ -51,14 +60,15 @@ export default defineComponent({
             style="margin: 12px 0px;"
             prepend-icon="account_circle"
             :title="loginStore.userdata?.username"
+            v-click-outside="onClickoutside"
         >
         </v-list-item>
         
         <v-divider></v-divider>
 
         <v-list density="compact" nav>
-            <v-list-item prepend-icon="home" title="Home" value="home" @click="fnGotoHomeView"></v-list-item>
-            <v-list-item prepend-icon="homemax" title="About" value="about" @click="fnGotoAboutView"></v-list-item>
+            <v-list-item prepend-icon="playlist_add_check" title="Measuring Request" value="home" @click="fnGotoRequestView"></v-list-item>
+            <v-list-item prepend-icon="dashboard" title="Dashboard" value="about" @click="fnGotoDashboardView"></v-list-item>
             <v-divider></v-divider>
             <v-list-item>
                 <v-btn block variant="flat" color="red" @click="fnLogOut">

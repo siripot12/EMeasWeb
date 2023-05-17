@@ -7,7 +7,10 @@ import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
+
 import { aliases, md } from "vuetify/iconsets/md";
+import { fa } from "vuetify/iconsets/fa";
+import '@fortawesome/fontawesome-free/css/all.css'
 
 import App from './App.vue'
 import router from './router'
@@ -18,6 +21,7 @@ import './assets/main.css'
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
+
 //Vuetify global styles
 const vuetify = createVuetify({
     theme:{
@@ -26,11 +30,24 @@ const vuetify = createVuetify({
             myCustomTheme:{
                 dark:false,
                 colors:{
-                    primary: '#43A047',
-                    secondary: '#81C784',
+                    primary: '#6c757d',
+                    secondary: '#F5F3F5',
                     buttonPrimary: '#3F51B5',
                     buttonSecondary: '#424242'
-                },
+                }
+            },
+            light: {
+                colors:{
+                    background: '#FFFFFF',
+                    primary: '#25316A',
+                    secondary: '#b0bec5',
+                    accent: '#25316A',
+                    error: '#E86674',
+                    orange: '#FF7A0D',
+                    golden: '#A68C59',
+                    badge: '#F5528C',
+                    customPrimary: '#085294'
+                }
             }
         },
         variations:{
@@ -50,7 +67,8 @@ const vuetify = createVuetify({
         defaultSet: 'md',
         aliases,
         sets:{
-            md
+            md,
+            fa
         }
     },
     components,

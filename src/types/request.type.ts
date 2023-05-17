@@ -7,6 +7,8 @@ export interface IPartRegisterReq{
 
 export interface IRequest{
     id : number;
+    state : number;
+    completedate? : Date;
     qrcode : string;
     measuringMode: number;
     dateTime: Date;
@@ -24,6 +26,8 @@ export interface IRequest{
 
 export const defaultIRequest:IRequest = {
     id : 0,
+    state : 0,
+    completedate : undefined,
     qrcode : '',
     measuringMode : 1,
     dateTime : new Date(2023, 12, 24, 10, 33, 31),

@@ -44,6 +44,10 @@ export default defineComponent({
         let expanded = ref([])
 
         onMounted(async()=>{
+            fnFetchingItems();
+        })
+
+        const fnFetchingItems = async()=>{
             //Get reguster items from API by login id.
             const res = await axios?.get<string,any>(`/PartRegister/ItemsReadByRequesterId?req=${loginstore.userdata?.employeeno}`).catch((error)=>{
                 alert('Fail', `Code : ${res.status} Message : ${res.data}`)
@@ -51,10 +55,11 @@ export default defineComponent({
 
             if(res.status === 200)
             {
+                data.splice(0, data.length);
                 const items = res.data as IRequest[]
                 items.map(x=>data.push(x))
             }
-        })
+        }
 
         const fnDialogClose = ()=>{
             isOpendialog.value = false
@@ -78,6 +83,10 @@ export default defineComponent({
             if(deleteIndex > -1){
                 data.splice(deleteIndex, 1)
             }
+        }
+
+        const fnClickRefresh = async()=>{
+            await fnFetchingItems();
         }
 
         const fnClickAdd = ()=>{
@@ -115,6 +124,7 @@ export default defineComponent({
             isOpendialog,
             fnDialogClose,
             fnRegisterAdd,
+            fnClickRefresh,
             fnClickAdd,
             fnClickEdit,
             fnClickCopy,
@@ -143,16 +153,12 @@ export default defineComponent({
             show-expand
         >
             <template v-slot:top>
-                <v-toolbar flat>
-                    <v-toolbar-title>
-                        <div style="display: flex; flex-direction: row; justify-content: center; color: #555b6e;">
-                            <v-icon icon="schedule_send" class="mr-3"></v-icon>
-                            <b style="display: block; text-align: center;">
-                                Requestion Table
-                            </b>
-                        </div>
-                    </v-toolbar-title>
-                </v-toolbar>
+
+                <v-card style="background-color: #F5F3F5; margin: 5px 5px;">
+                    <div style="background-color: #6C757D; height: 55px; display: flex; justify-content: center; align-items: center;">
+                        <strong>Measuring Request</strong>
+                    </div>
+                </v-card>
 
                 <div style="display: flex; flex-direction: column;">
                     <v-divider></v-divider>
@@ -160,17 +166,28 @@ export default defineComponent({
                         <v-dialog max-width="850px" persistent v-model="isOpendialog">
                             <template v-slot:activator="{ props }" >
                                 <v-btn
-                                color="primary"
-                                dark
+                                color="green"
                                 class="mt-2 mb-2 mr-2"
                                 v-bind="props"
                                 @click="fnClickAdd"
                                 prepend-icon="add"
                                 >
                                     <template v-slot:prepend>
-                                        <v-icon color="red"></v-icon>
+                                        <v-icon color="white"></v-icon>
                                     </template>
                                     Add New Item
+                                </v-btn>
+
+                                <v-btn
+                                color="blue"
+                                class="mt-2 mb-2 mr-2"
+                                @click="fnClickRefresh"
+                                prepend-icon="refresh"
+                                >
+                                    <template v-slot:prepend>
+                                        <v-icon color="white"></v-icon>
+                                    </template>
+                                    REFRESH
                                 </v-btn>
                             </template>
                             <request-detail-component :data="selectedData" @on-close="fnDialogClose" @on-add="fnRegisterAdd" @on-edit="dataEditItem"/>
@@ -178,7 +195,7 @@ export default defineComponent({
                     </div>
                     <v-divider></v-divider>
                 </div>
-                
+
             </template>
 
             <template v-slot:expanded-row="{ columns, item }">
@@ -236,22 +253,30 @@ export default defineComponent({
                     @click="fnClickCopy(item.raw)"
                     >
                     </v-icon>
-                    <v-divider vertical class="ml-2 mr-2"></v-divider>
+
+                    <v-divider v-if="item.raw.state != 2 && item.raw.state != 3" vertical class="ml-2 mr-2"></v-divider>
                     <v-icon
+                        v-if="item.raw.state != 2 && item.raw.state != 3"
                         icon="edit"
                         size="small"
                         color="orange"
                         @click="fnClickEdit(item.raw)"
                     >
                     </v-icon>
-                    <v-divider vertical class="ml-2 mr-2"></v-divider>
+
+                    <v-divider v-if="item.raw.state != 3" vertical class="ml-2 mr-2"></v-divider>
                     <v-icon
+                        v-if="item.raw.state != 3"
                         icon="delete"
                         size="small"
                         color="red"
                         @click="fnClickDelete(item.raw)"
                     >
                     </v-icon>
+
+                    <div v-if="item.raw.state != 1" style="display: flex;">
+
+                    </div>
                 </div>
             </template>
         </v-data-table>
@@ -280,6 +305,13 @@ export default defineComponent({
         height: 96vh;
         background-color: white;
     }
+
+    div strong{
+        text-align: center;
+        color: white;
+        font-size: 24px;
+    }
+
     ::v-deep .v-toolbar__content{
         background: #96e072;
     }

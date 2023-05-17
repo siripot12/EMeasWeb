@@ -27,9 +27,18 @@ export default defineComponent({
         let navbarState = ref<number>(0)
         const loginstore = useLoginStore()
 
+        const isMasterFetching = ref<Boolean>(false);
+        const isGetmasterFail = ref<Boolean>(false);
+
         onMounted(async ()=>{
+          isMasterFetching.value = true;
           await masterStore.fetchmaster();
-          //console.log(masterStore.mastervalue);
+
+
+          if(masterStore.isSuccess) isGetmasterFail.value = false;
+          else isGetmasterFail.value = true;
+
+          isMasterFetching.value = false;
         });
 
         const fnHeaderClick = () =>{
@@ -39,7 +48,9 @@ export default defineComponent({
         return{
           loginstore,
           navbarState,
-          fnHeaderClick
+          fnHeaderClick,
+          isMasterFetching,
+          isGetmasterFail
         }
     }
 })
@@ -47,14 +58,29 @@ export default defineComponent({
 
 <template>
   <v-layout class="container-app-main">
-    <div v-if="loginstore.isLoginState === true">
-      <header-component title="Web application" @on-click="fnHeaderClick"/>
-      <navbar-component :navbarstate="navbarState"/>
-    </div>
+    <!-- Fetching -->
+    <v-card v-if="isMasterFetching == true" style="align-self: center; width: 100%;  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: 'secondary'; margin: 200px;">
+      <v-icon icon="autorenew" size="100" color="blue"></v-icon>
+      <strong style="color: blue;">Fetching master data from server.</strong>
+    </v-card>
 
-    <v-main>
-      <RouterView/>
-    </v-main>
+     <!-- Get master fail -->
+    <v-card v-else-if="isGetmasterFail == true" style="align-self: center; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: #'secondary'; margin: 200px;">
+      <v-icon icon="report" size="100" color="red"></v-icon>
+      <strong style="color: red;">Fetch master data from server fail.</strong>
+    </v-card>
+
+    <div v-else>
+      <div v-if="loginstore.isLoginState === true">
+        <header-component title="E-Measurement Web Application" @on-click="fnHeaderClick"/>
+        <navbar-component :navbarstate="navbarState"/>
+      </div>
+
+      <v-main>
+        <RouterView/>
+      </v-main>
+    </div>
+    
   </v-layout>
 </template>
 
@@ -63,6 +89,7 @@ export default defineComponent({
     box-sizing: border-box;
     width: 100vw;
     height: 100vh;
+    background-color: white;
   }
 
   .swal2-container{
