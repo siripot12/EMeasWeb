@@ -37,24 +37,29 @@ export default defineComponent({
 
         var isOperationMode : 'add'|'edit';
 
-        var titel = ref<string>('');
-        var isQrReadonly = ref<boolean>(false)
-        var inQrcode = ref<string>('')
-        var inDate = ref<Date>()
-        var inmeasuremode = ref<MasterMeasureMode>({...defaultIMasterMeasureMode})
-        var inpartnumber = ref<MasterPartnumber>({...defaultMasterpartnumber})
-        var inpartname = ref<MasterPartName>({...defaultMasterPartname})
-        var inprocess = ref<MasterProcessName>({...defaultMasterProcessname})
-        var initemnumber = ref<MasterItemNumber>({...defaultMasterItemnumber})
-        var inround = ref<MasterRound>({...defaultMasterround})
-        var inmachinenumber = ref<MasterMachineName>({...defaultMastermachinename})
-        var injig = ref<MasterJigNumber>({...defaultMasterjignumber});
-        var inlot = ref<string>('');
-        var inremark = ref<string>('')
-        var intraynumber = ref<MasterTrayNumber>({...defaultMastertraynumber})
+        const titel = ref<string>('');
+        const isQrReadonly = ref<boolean>(false)
+        const inQrcode = ref<string>('')
+        const inDate = ref<Date>()
+        const inmeasuremode = ref<MasterMeasureMode>({...defaultIMasterMeasureMode})
+        const inpartnumber = ref<MasterPartnumber>({...defaultMasterpartnumber})
+        const inpartname = ref<MasterPartName>({...defaultMasterPartname})
+        const inprocess = ref<MasterProcessName>({...defaultMasterProcessname})
+        const initemnumber = ref<MasterItemNumber>({...defaultMasterItemnumber})
+        const inround = ref<MasterRound>({...defaultMasterround})
+        const inmachinenumber = ref<MasterMachineName>({...defaultMastermachinename})
+        const injig = ref<MasterJigNumber>({...defaultMasterjignumber});
+        const inlot = ref<string>('');
+        const inremark = ref<string>('')
+        const intraynumber = ref<MasterTrayNumber>({...defaultMastertraynumber})
 
-        var originaldata:IRequest = {...props.data!}
-        var editeddata = ref<IRequest>({...props.data!})
+        const originaldata = ref<IRequest>({...props.data!})
+        const editeddata = ref<IRequest>({...props.data!})
+
+        const memoryQrcode = ref<string>('')
+        const isUseOriginalQr = ref<boolean>(false);
+        const isQrChanged = ref<boolean>(false);
+        const isLockConfirm = ref<boolean>(false);
 
         //Rules
         var valid = ref<boolean>(false)
@@ -75,48 +80,48 @@ export default defineComponent({
             if(props.data === undefined || props.data.id === 0){
                 isOperationMode = 'add'
                 titel.value = "Request new item"
-                originaldata = props.data? {...props.data, itemnumber:props.data.itemnumber+1} : {...defaultIRequest}
+                originaldata.value = props.data? {...props.data, itemnumber:props.data.itemnumber+1} : {...defaultIRequest}
                 inDate.value = new Date()
             }
             else{
                 isOperationMode = 'edit'
                 titel.value = "Edit item"
-                inDate.value = originaldata.dateTime;
+                inDate.value = originaldata.value.dateTime;
                 //Memmory scanned qrcode.
-                scannedQrcode.value = originaldata.qrcode
-                editeddata.value = {...originaldata}
+                memoryQrcode.value = originaldata.value.qrcode
+                editeddata.value = {...originaldata.value}
             }
 
             initialUi();
         });
 
         const initialUi = ()=>{
-            const measuremode = masterStore.mastervalue?.measuremode.find(e=>e.id == originaldata.measuringMode)
+            const measuremode = masterStore.mastervalue?.measuremode.find(e=>e.id == originaldata.value.measuringMode)
             inmeasuremode.value = measuremode? measuremode: {...defaultIMasterMeasureMode}
-            const partnumber = masterStore.mastervalue?.partnumber.find(e=>e.name == originaldata.partnumber)
+            const partnumber = masterStore.mastervalue?.partnumber.find(e=>e.name == originaldata.value.partnumber)
             inpartnumber.value = partnumber? partnumber:{...defaultMasterpartnumber}
-            const partname = masterStore.mastervalue?.partname.find(e=>e.id == originaldata.partname)
+            const partname = masterStore.mastervalue?.partname.find(e=>e.id == originaldata.value.partname)
             inpartname.value = partname? partname: {...defaultMasterPartname}
-            const processname = masterStore.mastervalue?.processname.find(e=>e.id == originaldata.process)
+            const processname = masterStore.mastervalue?.processname.find(e=>e.id == originaldata.value.process)
             inprocess.value = processname? processname:{...defaultMasterProcessname}
-            const machineitem = masterStore.mastervalue?.machineitems.find(e=>e.value == originaldata.itemnumber)
+            const machineitem = masterStore.mastervalue?.machineitems.find(e=>e.value == originaldata.value.itemnumber)
             initemnumber.value = machineitem? machineitem:{...defaultMasterItemnumber}
-            const round = masterStore.mastervalue?.round.find(e=>e.value == originaldata.round)
+            const round = masterStore.mastervalue?.round.find(e=>e.value == originaldata.value.round)
             inround.value = round? round:{...defaultMasterround}
-            const machinename = masterStore.mastervalue?.machinename.find(e=>e.id == originaldata.machinenumber)
+            const machinename = masterStore.mastervalue?.machinename.find(e=>e.id == originaldata.value.machinenumber)
             inmachinenumber.value = machinename? machinename:{...defaultMastermachinename}
-            const jignumber = masterStore.mastervalue?.jignumber.find(e=>e.value == originaldata.jignumber)
+            const jignumber = masterStore.mastervalue?.jignumber.find(e=>e.value == originaldata.value.jignumber)
             injig.value = jignumber? jignumber:{...defaultMasterjignumber}
-            const traynumber = masterStore.mastervalue?.traynumber.find(e=>e.value == originaldata.traynumber)
+            const traynumber = masterStore.mastervalue?.traynumber.find(e=>e.value == originaldata.value.traynumber)
             intraynumber.value = traynumber? traynumber:{...defaultMastertraynumber}
 
-            inlot.value = originaldata.lotMachining? originaldata.lotMachining: ''
-            inremark.value = originaldata.remark? originaldata.remark:''
+            inlot.value = originaldata.value.lotMachining? originaldata.value.lotMachining: ''
+            inremark.value = originaldata.value.remark? originaldata.value.remark:''
 
-            inQrcode.value = originaldata.qrcode;
+            inQrcode.value = originaldata.value.qrcode;
         }
 
-        let scannedQrcode = ref<string>('')
+        
         const fnModeSelectChanged = ()=>{
             if(inmeasuremode.value.id == 1) {
                 fnQrgenerate()
@@ -124,7 +129,7 @@ export default defineComponent({
             }
             else
             {
-                inQrcode.value = scannedQrcode.value
+                if(isUseOriginalQr.value == false) inQrcode.value = memoryQrcode.value
                 isQrReadonly.value = false
             }
         }
@@ -139,7 +144,7 @@ export default defineComponent({
         }
 
         const fnQrgenerate = ():string=>{
-            if(editeddata.value.measuringMode != 1) return editeddata.value.qrcode
+            if(editeddata.value.measuringMode != 1 || isUseOriginalQr.value == true) return editeddata.value.qrcode
             let qrcode = `${moment(editeddata.value.dateTime).format("DDMMYYYYhhmmss") + zeroPad(editeddata.value.partname,3)
             + zeroPad(editeddata.value.process,5) + zeroPad(editeddata.value.measuringMode,2) + zeroPad(editeddata.value.machinenumber,2)
             + zeroPad(editeddata.value.jignumber,2)}`
@@ -190,6 +195,12 @@ export default defineComponent({
             }
         }
 
+        const fncheckLockConfirm = ()=>{
+            console.log(inmeasuremode.value.id);
+            if(isUseOriginalQr.value && inmeasuremode.value.id == 1) isLockConfirm.value = true;
+            else isLockConfirm.value = false;
+        }
+
         return{
             titel,
             fnModeSelectChanged,
@@ -197,10 +208,12 @@ export default defineComponent({
             fndateTostring,
             fnclick,
             fncancle,
+            fncheckLockConfirm,
             isQrReadonly,
             editeddata,
+            originaldata,
             masterStore,
-            scannedQrcode,
+            memoryQrcode,
             inQrcode,
             inDate,
             inmeasuremode,
@@ -217,19 +230,33 @@ export default defineComponent({
             valid,
             required,
             requiredcombobox,
-            minLength
+            minLength,
+            isUseOriginalQr,
+            isQrChanged,
+            isLockConfirm
         }
     },
     watch:{
+        isUseOriginalQr(){
+            //Normal mode then disable confirm button.
+            this.fncheckLockConfirm();
+            if(this.isUseOriginalQr) this.inQrcode = this.originaldata.qrcode;
+            else this.inQrcode = this.fnQrgenerate();
+            
+        },
         inQrcode(){
             this.editeddata = {...this.editeddata, qrcode:this.inQrcode};
-            //If manual mode no selected load input qr code to memory.
-            if(this.inmeasuremode.id != 1) this.scannedQrcode = this.inQrcode!
+            //If selected modes except normal mode store input qr code to memory.
+            if(this.inmeasuremode.id != 1) this.memoryQrcode = this.inQrcode!
+
+            if(this.originaldata.qrcode && (this.editeddata.qrcode != this.originaldata.qrcode)) this.isQrChanged = true;
+            else this.isQrChanged = false;
         },
         inDate(){this.editeddata = {...this.editeddata, dateTime:this.inDate!}; this.fnQrgenerate();},
         inmeasuremode(){
+            this.fncheckLockConfirm();
             this.editeddata = {...this.editeddata, measuringMode: this.inmeasuremode? this.inmeasuremode.id : 0}
-            this.fnModeSelectChanged()
+            this.fnModeSelectChanged();
         },
         inpartnumber(){this.editeddata = {...this.editeddata, partnumber: this.inpartnumber? this.inpartnumber.name : ''}; this.fnQrgenerate();},
         inpartname(){if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},
@@ -247,16 +274,26 @@ export default defineComponent({
 
 <template>
     <v-card>
-        <v-card-title>
-            <span class="text-h5">{{titel}}</span>
+        <v-card-title style="display: flex; flex-direction: column;">
+            <span class="text-h5" style="margin-bottom: 10px;">{{titel}}</span>
+            <v-card v-if="isQrChanged == true"  style="display: flex; align-items: center; padding: 0px 20px; margin: 5px 20px; background-color: orange;">
+                <v-icon icon="warning" class="mr-2"></v-icon>
+                <p>QR code is different with original</p>
+            </v-card>
+
+            <v-card v-if="isLockConfirm == true"  style="display: flex; align-items: center; padding: 0px 20px; margin: 5px 20px; background-color:yellow;">
+                <v-icon icon="warning" class="mr-2"></v-icon>
+                <p>Can not use original qrcode for normal measuring mode.</p>
+            </v-card>
         </v-card-title>
 
-        <v-card-text>
+        <v-card-text style="padding-top: 0px;">
             <v-form v-model="valid">
-                <v-container>
+                <v-container style="padding-top: 0px;">
                 <v-row>
-                    <v-col cols="8" offset="0">
+                    <v-col cols="8" offset="0" style="display: flex;">
                         <v-text-field
+                            style="width: 100%;"
                             label="Qr code"
                             :readonly="isQrReadonly"
                             v-model="inQrcode"
@@ -264,6 +301,9 @@ export default defineComponent({
                             type="qrcode"
                             :rules="[required('qrcode'), minLength('qrcode', 28)]"
                         ></v-text-field>
+                        <div style="width: 140px; display: flex; flex-direction: column;" >
+                            <v-checkbox label="Lock" v-model="isUseOriginalQr" color="#F46036" messages="(Except normal)"></v-checkbox>
+                        </div>
                     </v-col>
 
                     <v-col cols="4" offset="0">
@@ -422,7 +462,7 @@ export default defineComponent({
                         color="blue-darken-4"
                         prepend-icon="check_circle"
                         @click="fnclick"
-                        :disabled="!valid"
+                        :disabled="!valid || isLockConfirm"
                     >
                         <template v-slot:prepend>
                             <v-icon color="success" type="submit"></v-icon>
@@ -462,5 +502,12 @@ export default defineComponent({
     ::v-deep .v-text-field .v-input__details {
         align-items: center;
         padding: 0px;
+    }
+
+    ::v-deep .v-messages__message{
+        color: red;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
     }
 </style>
