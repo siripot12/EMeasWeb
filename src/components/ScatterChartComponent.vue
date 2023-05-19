@@ -117,15 +117,22 @@ export default defineComponent({
             _datasets.value = datasetMapping();
         })
 
-        
+
 
         const tooltip = (tooltipitems:TooltipItem<"scatter">[]):string =>{
             let context:String = '-';
             tooltipitems.map(e=> {
                 context +=`Measuringmode [${e.dataset.label}]\n`
+                context +=`Round : ${(e.raw as ValuePositionModel).round}\n`
                 context +=`Qr code : ${(e.raw as ValuePositionModel).qrcode}\n`
                 context +=`Value : ${(e.raw as ValuePositionModel).value.toFixed(4)} Jignumber : ${(e.raw as ValuePositionModel).jignumber} Itemnumber : ${(e.raw as ValuePositionModel).itemnumber}\n`
-                context += `PDF : ${(e.raw as ValuePositionModel).filepath}\n`
+
+                let filepathitems = (e.raw as ValuePositionModel).filepath;
+                filepathitems.forEach((item, index, arr)=>{
+                    context += `PDF[${index+1}] : ${item}\n`
+                })
+                //context += `PDF : ${(e.raw as ValuePositionModel).filepath}\n`
+
                 context += `Machining lot : ${(e.raw as ValuePositionModel).machininglot}\n`
                 context += `Remark : ${(e.raw as ValuePositionModel).remark}\n`
                 context +=`-------------------------------------------------\n`
@@ -151,7 +158,7 @@ export default defineComponent({
             options,
         });
 
-    
+
         return{
             props,
             options,

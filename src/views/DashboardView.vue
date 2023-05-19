@@ -8,7 +8,8 @@ import CardComponent from '@/components/CardComponent.vue'
 import CardselectorComponent from '@/components/CardSelectorComponent.vue';
 
 import type { AxiosStatic } from 'axios';
-import type { ValueitemsResponse } from '@/types/dashboard.type'
+import type { DashboardItemsResponse, ValueitemsResponse } from '@/types/dashboard.type'
+import moment from 'moment'
 
 export default defineComponent({
     components:{ScatterChart, CardComponent, CardselectorComponent},
@@ -25,6 +26,7 @@ export default defineComponent({
         const selPartnameObj = ref<MasterPartName | undefined>(undefined);
 
         const data = ref<ValueitemsResponse[]|undefined>(undefined);
+        const datatimestamp = ref<string>();
         const isClear = ref<Boolean>(false);
 
         const fnFetchdata = async()=>{
@@ -34,7 +36,9 @@ export default defineComponent({
             })
 
             if(res.status === 200){
-                data.value = res.data as ValueitemsResponse[];
+                const obj = res.data as DashboardItemsResponse;
+                data.value = obj.values;
+                datatimestamp.value = moment(obj.timestamp).format("hh:mm:ss");
             }
         }
 
@@ -75,6 +79,7 @@ export default defineComponent({
             selProcessObj,
             selPartnameObj,
             data,
+            datatimestamp,
             isClear
         }
     }
@@ -94,7 +99,7 @@ export default defineComponent({
                     <v-col sm="6" md="3"> <CardselectorComponent :itemsmaster="selMachinemster" icon="laptop_mac" @on-selected="fnMachineselected"/> </v-col>
                     <v-col sm="6" md="3"> <CardComponent title="Partname" :content="selPartnameObj?.name" icon="memory"/> </v-col>
                     <v-col sm="6" md="3"> <CardComponent title="Process" :content="selProcessObj?.name" icon="developer_board"/> </v-col>
-                    <v-col sm="6" md="3"> <CardComponent title="Timestamp"/> </v-col>
+                    <v-col sm="6" md="3"> <CardComponent title="Timestamp" :content="datatimestamp"/> </v-col>
                 </v-row>
             </div>
         </v-card>

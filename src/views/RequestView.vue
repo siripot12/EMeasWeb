@@ -66,7 +66,8 @@ export default defineComponent({
         }
 
         const fnRegisterAdd = (value:IRequest)=>{
-            data.push(value)
+            //data.push(value)
+            data.splice(0, 0, value);
             fnDialogClose();
         }
 

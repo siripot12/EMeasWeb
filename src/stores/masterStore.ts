@@ -68,8 +68,8 @@ export const useMasterStore = defineStore('masterStore',
         getdatetimetext(dt:Date):string{
             return moment(dt).format("YYYY/MM/DD hh:mm:ss")
         },
-        getroundtext(round:number):string{
-            return round.toFixed(2);
+        getroundtext(id:number):string|undefined{
+            return this.mastervalue?.round.find(e=>e.id == id)?.name;
         },
         getitemnumberbyvalue(value:number):string{
             let obj = this.mastervalue?.machineitems.find(e=>e.value == value)

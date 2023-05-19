@@ -106,7 +106,7 @@ export default defineComponent({
             inprocess.value = processname? processname:{...defaultMasterProcessname}
             const machineitem = masterStore.mastervalue?.machineitems.find(e=>e.value == originaldata.value.itemnumber)
             initemnumber.value = machineitem? machineitem:{...defaultMasterItemnumber}
-            const round = masterStore.mastervalue?.round.find(e=>e.value == originaldata.value.round)
+            const round = masterStore.mastervalue?.round.find(e=>e.id == originaldata.value.round)
             inround.value = round? round:{...defaultMasterround}
             const machinename = masterStore.mastervalue?.machinename.find(e=>e.id == originaldata.value.machinenumber)
             inmachinenumber.value = machinename? machinename:{...defaultMastermachinename}
@@ -263,7 +263,7 @@ export default defineComponent({
         inprocess(){if(typeof this.inprocess === 'string') return; this.editeddata = {...this.editeddata, process: this.inprocess? this.inprocess.id:0}; this.fnQrgenerate();},
         initemnumber(){if(typeof this.initemnumber === 'string') return; this.editeddata = {...this.editeddata, itemnumber: this.initemnumber? this.initemnumber.value:0}; this.fnQrgenerate();},
         inmachinenumber(){if(typeof this.inmachinenumber === 'string') return; this.editeddata = {...this.editeddata, machinenumber: this.inmachinenumber? this.inmachinenumber.id:0}; this.fnQrgenerate();},
-        inround(){if(typeof this.inround === 'string') return; this.editeddata = {...this.editeddata, round: this.inround? this.inround.value:0}; this.fnQrgenerate();},
+        inround(){if(typeof this.inround === 'string') return; this.editeddata = {...this.editeddata, round: this.inround? this.inround.id:0}; this.fnQrgenerate();},
         injig(){if(typeof this.injig === 'string') return; this.editeddata = {...this.editeddata, jignumber: this.injig? this.injig.value:0}; this.fnQrgenerate();},
         inlot(){this.editeddata = {...this.editeddata, lotMachining:this.inlot}},
         inremark(){this.editeddata = {...this.editeddata, remark:this.inremark}},

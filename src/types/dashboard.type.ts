@@ -1,8 +1,9 @@
 export interface ValuePositionModel{
+    round : number;
     qrcode : string;
     value : number;
     index : number;
-    filepath: string;
+    filepath: string[];
     machininglot : string;
     remark : string;
     jignumber : number;
@@ -25,5 +26,9 @@ export interface ValueitemsResponse{
     itemname: string;
     id : number;
     values : TypevalueResponse[];
+}
 
+export interface DashboardItemsResponse{
+    timestamp : Date;
+    values : ValueitemsResponse[];
 }
