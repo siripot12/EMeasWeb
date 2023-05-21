@@ -6,16 +6,19 @@ import { onMounted } from 'vue'
 import type { MasterMachineName, MasterMeasInstrument, MasterMeasureMode, MasterPartName, MasterProcessName, MasterRound } from '@/types/master.type'
 import CardComponent from '@/components/CardComponent.vue'
 import CardselectorComponent from '@/components/CardSelectorComponent.vue';
+import PDFSelectorComponent from '@/components/PDFSelector.vue';
+import VuePdfEmbed from 'vue-pdf-embed'
 
 import type { AxiosStatic } from 'axios';
 import type { DashboardItemsResponse, ValueitemsResponse } from '@/types/dashboard.type'
 import moment from 'moment'
+import { onUnmounted } from 'vue'
 
 export default defineComponent({
-    components:{ScatterChart, CardComponent, CardselectorComponent},
+    components:{ScatterChart, CardComponent, CardselectorComponent, PDFSelectorComponent, VuePdfEmbed},
     setup(){
         const axios = inject<AxiosStatic>('$axios')
-        
+
         const masterstore = useMasterStore()
         const selMeasInstrument = ref<MasterMeasInstrument[]|undefined>(undefined);
         const selRoundMaster = ref<MasterRound[] | undefined>();
@@ -28,6 +31,15 @@ export default defineComponent({
         const data = ref<ValueitemsResponse[]|undefined>(undefined);
         const datatimestamp = ref<string>();
         const isClear = ref<Boolean>(false);
+
+        const pdfitems = ref<String[]>([]);
+
+        const isOpendialog = ref<boolean>(false)
+        const isOpendialogPDFViewer = ref<boolean>(false);
+        const isOpendialogIsfetching = ref<boolean>(false);
+
+        const pdfSource = ref<String|Uint8Array>('');
+        const pdfPage:number|undefined = undefined;
 
         const fnFetchdata = async()=>{
             console.log("Fetching dashboard data");
@@ -49,6 +61,10 @@ export default defineComponent({
             selMachinemster.value = masterstore.mastervalue?.machinename as MasterMachineName[];
         })
 
+        onUnmounted(()=>{
+            if(timerId != 0) clearInterval(timerId)
+        })
+
         const fnMachineselected = (value:MasterMachineName) =>{
             selProcessObj.value = masterstore.mastervalue?.processname.find(e=>e.id == value.processName);
             selPartnameObj.value = masterstore.mastervalue?.partname.find(e=>e.id == value.partName);
@@ -60,7 +76,7 @@ export default defineComponent({
             fnFetchdata();
             //Set interval
             if(timerId != 0) clearInterval(timerId)
-            //timerId = setInterval(fnFetchdata, 10000)
+            timerId = setInterval(fnFetchdata, 10000)
         }
 
         const selectedMasterItem = (partnameid:number|undefined, processid:number|undefined):MasterMeasInstrument[] => {
@@ -69,9 +85,43 @@ export default defineComponent({
             return result as MasterMeasInstrument[];
         }
 
+        const fnOnpointClick = (items:string[])=>{
+            if(items.length == 0) return;
+            pdfitems.value = items;
+            isOpendialog.value = true;
+        }
+
+        const fnCloseDialog = ()=>{
+            isOpendialog.value = false;
+        }
+
+        const fnConfirmOpenPdf = async(filepath:string)=>{
+            //console.log(filepath)
+            //pdfSource.value = 'http://localhost:7118/api/Pdf/readpdffromserver?filesubpath=%2FNeedle%2FEdgeless%2FRoundness%2F2023%2F05%2F20%2FEMEAS_20230520_072036-RE.pdf'
+            isOpendialogIsfetching.value = true;
+            let res = await axios?.get<any, any>(`/Pdf/readpdffromserver?filesubpath=${filepath}`, {responseType:'blob'}).catch((error)=>{
+                alert(`Code : ${res.status} Message : ${res.data}`)
+            })
+
+            if(res.status == 200)
+            {
+                const blob = new Blob([res.data]);
+                const objectUrl = URL.createObjectURL(blob);
+                pdfSource.value = objectUrl;
+            }
+            else{pdfSource.value = ''}
+
+            isOpendialogIsfetching.value = false;
+            isOpendialog.value = false;
+            isOpendialogPDFViewer.value = true;
+        }
+
         return{
             fnFetchdata,
             fnMachineselected,
+            fnOnpointClick,
+            fnCloseDialog,
+            fnConfirmOpenPdf,
             selMeasInstrument,
             selRoundMaster,
             selMeasuremode,
@@ -80,7 +130,13 @@ export default defineComponent({
             selPartnameObj,
             data,
             datatimestamp,
-            isClear
+            isClear,
+            isOpendialog,
+            pdfitems,
+            pdfSource,
+            isOpendialogPDFViewer,
+            isOpendialogIsfetching,
+            pdfPage
         }
     }
 })
@@ -89,10 +145,32 @@ export default defineComponent({
 <template>
     <div class="container">
 
+        <v-dialog max-width="850px" persistent v-model="isOpendialog">
+            <PDFSelectorComponent :items="pdfitems" @on-close="fnCloseDialog" @on-confirm="fnConfirmOpenPdf"/>
+        </v-dialog>
+
+        <v-dialog persistent v-model="isOpendialogIsfetching" max-width="300px" min-width="100px">
+            <v-card style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px;">
+                <v-icon icon="autorenew" size="100" class="mb-3"></v-icon>
+                <div color="#3772ff" style="font-size: large;">Fetching PDF from server.....</div>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog max-width="850px" v-model="isOpendialogPDFViewer">
+            <div style="background-color: #6C757D; height: 55px; display: flex; justify-content: center; align-items: center;">
+                <strong>PDF Viewer</strong>
+            </div>
+
+            <div style="overflow-y: scroll;">
+                <vue-pdf-embed :source="pdfSource" :page="pdfPage"/>
+            </div>
+        </v-dialog>
+
+
         <v-card style="background-color: #F5F3F5; margin: 5px 5px;">
             <div style="background-color: #6C757D;">
                 <strong>Process Measuring Dashboard</strong>
-                <v-btn @click="fnFetchdata">Fetch</v-btn>
+                <!-- <v-btn @click="fnFetchdata">Fetch</v-btn> -->
             </div>
             <div style="padding: 15px;">
                 <v-row>
@@ -111,7 +189,7 @@ export default defineComponent({
         </div>
         <ul v-else>
             <li v-for="(item, index) in selMeasInstrument">
-                <ScatterChart :title='(item.name as string)' :roundmster="selRoundMaster" :measuremodemaster="selMeasuremode" :data="data?.find(e=>e.id == item.id)" :clear="isClear"></ScatterChart>
+                <ScatterChart :title='(item.name as string)' @on-point-click="fnOnpointClick" :roundmster="selRoundMaster" :measuremodemaster="selMeasuremode" :data="data?.find(e=>e.id == item.id)" :clear="isClear"></ScatterChart>
             </li>
         </ul>
     </div>

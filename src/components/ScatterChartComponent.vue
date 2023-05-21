@@ -8,6 +8,7 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import type {MasterMeasureMode, MasterRound} from '@/types/master.type';
 import { onMounted } from 'vue';
 import type { ValuePositionModel, ValueitemsResponse } from '@/types/dashboard.type';
+import { ssrContextKey } from 'vue';
 
 
 Chart.register(...registerables, annotationPlugin);
@@ -43,7 +44,7 @@ const dataset:ChartDataset<"scatter", (number | Point | null)> ={
 
 export default defineComponent({
     props: defprops,
-    emits:[],
+    emits:['onPointClick'],
     components:{ ScatterChart },
     setup(props, { emit }){
         //const dataValues = ref<Point[]>([{x:0,y:1},{x:2,y:2},{x:3,y:3},{x:4,y:4}]);
@@ -109,6 +110,9 @@ export default defineComponent({
                     footer: tooltip
                 }
             }
+        },
+        onClick:(evt, item:any)=>{
+            if(item.length > 0) fnPointClick(item);
         }
         }));
 
@@ -117,7 +121,15 @@ export default defineComponent({
             _datasets.value = datasetMapping();
         })
 
-
+        const fnPointClick = (items: any)=>{
+            let files:string[] = [];
+            items.forEach((item:any, index:number)=>{
+                const obj = item.element.$context.raw as ValuePositionModel;
+                obj.filepath.forEach((item2)=> files.push(item2))
+            })
+            if(files.length == 1 && files[0] == '') files = [];
+            emit('onPointClick', files)
+        }
 
         const tooltip = (tooltipitems:TooltipItem<"scatter">[]):string =>{
             let context:String = '-';
@@ -175,7 +187,10 @@ export default defineComponent({
             <div class="header">
                 {{props.title}}
             </div>
-            <ScatterChart style="padding: 20px;" v-bind="scatterChartProps" />
+            <ScatterChart
+            style="padding: 20px;"
+            v-bind="scatterChartProps"
+            />
         </v-card>
     </div>
 </template>

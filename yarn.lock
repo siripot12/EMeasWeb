@@ -1268,6 +1268,11 @@ vue-demi@*:
   resolved "https://registry.npmjs.org/vue-demi/-/vue-demi-0.14.0.tgz"
   integrity sha512-gt58r2ogsNQeVoQ3EhoUAvUsH9xviydl0dWJj7dabBC/2L4uBId7ujtCwDRD0JhkGsV1i0CtfLAeyYKBht9oWg==
 
+vue-pdf-embed@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/vue-pdf-embed/-/vue-pdf-embed-1.1.6.tgz#5bb806ed495970c09fb955c9fa40fb3a6bd4fced"
+  integrity sha512-CRQIw8OxiD6H1n8KT2zVWbp/00fA3PgSV/JYJ0Ut+FdC1jHrRDHNBj3BvaRVwZFZg3EJ8LLjyEDYxWWUMOjrDw==
+
 vue-router@^4.1.6:
   version "4.1.6"
   resolved "https://registry.npmjs.org/vue-router/-/vue-router-4.1.6.tgz"

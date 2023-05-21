@@ -121,7 +121,6 @@ export default defineComponent({
             inQrcode.value = originaldata.value.qrcode;
         }
 
-        
         const fnModeSelectChanged = ()=>{
             if(inmeasuremode.value.id == 1) {
                 fnQrgenerate()
@@ -242,7 +241,6 @@ export default defineComponent({
             this.fncheckLockConfirm();
             if(this.isUseOriginalQr) this.inQrcode = this.originaldata.qrcode;
             else this.inQrcode = this.fnQrgenerate();
-            
         },
         inQrcode(){
             this.editeddata = {...this.editeddata, qrcode:this.inQrcode};

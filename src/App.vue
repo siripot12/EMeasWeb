@@ -58,17 +58,20 @@ export default defineComponent({
 
 <template>
   <v-layout class="container-app-main">
-    <!-- Fetching -->
-    <v-card v-if="isMasterFetching == true" style="align-self: center; width: 100%;  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: 'secondary'; margin: 200px;">
-      <v-icon icon="autorenew" size="100" color="blue"></v-icon>
-      <strong style="color: blue;">Fetching master data from server.</strong>
-    </v-card>
+    <div v-if="isMasterFetching == true || isGetmasterFail == true" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+      <!-- Fetching -->
+      <v-card v-if="isMasterFetching == true" style="width: 100%;  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; max-width: 500px; background-color: 'secondary';">
+        <v-icon icon="autorenew" size="100" color="blue"></v-icon>
+        <strong style="color: blue;">Fetching master data from server.</strong>
+      </v-card>
 
-     <!-- Get master fail -->
-    <v-card v-else-if="isGetmasterFail == true" style="align-self: center; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: #'secondary'; margin: 200px;">
-      <v-icon icon="report" size="100" color="red"></v-icon>
-      <strong style="color: red;">Fetch master data from server fail.</strong>
-    </v-card>
+      <!-- Get master fail -->
+      <v-card v-else-if="isGetmasterFail == true" style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; max-width: 500px; background-color: 'secondary';">
+        <v-icon icon="report" size="100" color="red"></v-icon>
+        <strong style="color: red;">Fetch master data from server fail.</strong>
+      </v-card>
+    </div>
+    
 
     <div v-else>
       <div v-if="loginstore.isLoginState === true">

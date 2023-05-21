@@ -11,6 +11,7 @@ import { reactive } from 'vue';
 import { confirmation, alert, success } from "@/components/sweetalert/sweetalert";
 import type { AxiosStatic } from 'axios';
 import { useLoginStore } from '@/stores/loginStore';
+import { watch } from 'vue';
 
 export default defineComponent({
     components:{
@@ -26,7 +27,9 @@ export default defineComponent({
         const isOpendialog = ref<boolean>(false)
         const selectedData = ref<IRequest | undefined>()
 
-        const itemsPerPage:number = 99
+        const itemsPerPage:number = 50
+        const currentPage = ref<number>(1);
+
         const headers:any =
         [
             {title: 'Item', sortable: false, align: 'start', key:'number'},
@@ -135,6 +138,7 @@ export default defineComponent({
             masterstore,
             expanded,
             itemsPerPage,
+            currentPage,
             headers,
             data
         }
@@ -146,6 +150,7 @@ export default defineComponent({
     <div class="container">
         <v-data-table
             v-model:items-per-page="itemsPerPage"
+            v-model:page="currentPage"
             :headers="headers"
             :items="data"
             item-value="name"
@@ -215,7 +220,7 @@ export default defineComponent({
             </template>
 
             <template v-slot:item.number="{index}">
-                {{index+1}}
+                {{((currentPage-1)*itemsPerPage)+index+1}}
             </template>
 
             <template v-slot:item.itmnumber="{item}">
