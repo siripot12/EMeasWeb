@@ -7,8 +7,8 @@ import type { PropType } from 'vue';
 const defprops = {
     title: {type: String, default: '-', required: false},
     content: {type: undefined as unknown as PropType<String>, default: '-', required: false},
-    bkiconcolor: {type:String, default:'#F46036', required: false},
-    iconcolor: {type:String, default:'#0E1428', required: false},
+    bkiconcolor: {type:String, default:'rgb(var(--v-theme-iconBackPrimary))', required: false},
+    iconcolor: {type:String, default:'rgb(var(--v-theme-iconPrimary))', required: false},
     backcolor: {type: String, default:'#F5F3F5', required: false},
     fontcolor: {type: String, default:'#0E1428', required: false},
     icon: {type: String, default: 'alarm', required:false}
@@ -45,6 +45,7 @@ export default defineComponent({
         flex-direction: row;
         width: 100%;
         height: 100%;
+        position: static;
     }
 
     .cardComponentIconContainer{

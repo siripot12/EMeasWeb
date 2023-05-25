@@ -1,0 +1,4 @@
+{
+    "apiURLProd" :  "http://192.168.68.59:7000/api",
+    "apiURLDevelop" : "http://localhost:7010/api"
+}

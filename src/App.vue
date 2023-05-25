@@ -58,15 +58,15 @@ export default defineComponent({
 
 <template>
   <v-layout class="container-app-main">
-    <div v-if="isMasterFetching == true || isGetmasterFail == true" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+    <div v-if=" isMasterFetching == true || isGetmasterFail == true"  class="container-popup">
       <!-- Fetching -->
-      <v-card v-if="isMasterFetching == true" style="width: 100%;  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; max-width: 500px; background-color: 'secondary';">
+      <v-card v-if="isMasterFetching == true" class="container-popup-card">
         <v-icon icon="autorenew" size="100" color="blue"></v-icon>
         <strong style="color: blue;">Fetching master data from server.</strong>
       </v-card>
 
       <!-- Get master fail -->
-      <v-card v-else-if="isGetmasterFail == true" style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; max-width: 500px; background-color: 'secondary';">
+      <v-card v-else-if="isGetmasterFail == true" class="container-popup-card">
         <v-icon icon="report" size="100" color="red"></v-icon>
         <strong style="color: red;">Fetch master data from server fail.</strong>
       </v-card>
@@ -83,16 +83,41 @@ export default defineComponent({
         <RouterView/>
       </v-main>
     </div>
-    
   </v-layout>
 </template>
 
 <style >
+  body{
+    background: white !important;
+    display: flex;
+    flex-direction: column;
+    align-items: start !important;
+    justify-content: stretch !important;
+  }
+
   .container-app-main{
-    box-sizing: border-box;
+    padding: 0px 0px 15px 0px;
     width: 100vw;
     height: 100vh;
     background-color: white;
+  }
+
+  .container-popup{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .container-popup-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    max-width: 500px;
+    width: 350px;
+    background-color: rgb(var(--v-theme-secondary));
   }
 
   .swal2-container{

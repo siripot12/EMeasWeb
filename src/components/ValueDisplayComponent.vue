@@ -31,18 +31,21 @@ export default defineComponent({
 <template>
     <v-card style="min-width: 100px; min-height: 50px;">
         <template v-slot:title>
-            {{header}}
+            <strong>{{header}}</strong>
+            
         </template>
         <v-divider/>
         <template v-slot:text>
-            {{value}}
+            {{value == undefined || value == ''? '-':value}}
         </template>
     </v-card>
 </template>
 
 <style scoped>
 ::v-deep .v-card-item{
-    padding: 5px 20px;
+    padding: 0px 20px;
+    margin-bottom: 15px;
+    background-color: rgb(var(--v-theme-secondary));
 }
 ::v-deep .v-card-item .v-card-title{
     font-size: 12px;

@@ -160,9 +160,9 @@ export default defineComponent({
         >
             <template v-slot:top>
 
-                <v-card style="background-color: #F5F3F5; margin: 5px 5px;">
-                    <div style="background-color: #6C757D; height: 55px; display: flex; justify-content: center; align-items: center;">
-                        <strong>Measuring Request</strong>
+                <v-card style="margin: 5px 5px;">
+                    <div style="background-color: rgb(var(--v-theme-primary)); height: 55px; display: flex; justify-content: center; align-items: center;">
+                        <strong style="color: rgb(var(--v-theme-textSecondary));">Measuring Request</strong>
                     </div>
                 </v-card>
 
@@ -287,18 +287,6 @@ export default defineComponent({
             </template>
         </v-data-table>
     </div>
-
-    <!-- <div class="container">
-        <template>
-            <v-data-table
-                v-model:items-per-page="itemsPerPage"
-                :headers="headers"
-                :items="desserts"
-                item-value="name"
-                class="elevation-1"
-            ></v-data-table>
-        </template>
-    </div> -->
 </template>
 
 <style scoped>
@@ -307,9 +295,8 @@ export default defineComponent({
         flex-direction: column;
         justify-content: start;
         align-items: stretch;
-        width: 99vw;
-        height: 96vh;
-        background-color: white;
+        width: 100vw;
+        height: 100%;
     }
 
     div strong{

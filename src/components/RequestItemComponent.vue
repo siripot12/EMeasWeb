@@ -63,5 +63,7 @@ export default defineComponent({
     display: flex;
     flex-direction: row;
     justify-content: start;
+    height: 100%;
+    width: 100%;
 }
 </style>

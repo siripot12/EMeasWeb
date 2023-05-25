@@ -9,6 +9,7 @@ import type {MasterMeasureMode, MasterRound} from '@/types/master.type';
 import { onMounted } from 'vue';
 import type { ValuePositionModel, ValueitemsResponse } from '@/types/dashboard.type';
 import { ssrContextKey } from 'vue';
+import type { IPointObject } from '@/types/IPointObject';
 
 
 Chart.register(...registerables, annotationPlugin);
@@ -86,7 +87,7 @@ export default defineComponent({
                 suggestedMax: suggestXMax.value+1
             },
             y:{
-                grace:'10%',
+                grace:'0.001%',
                 ticks:{font:{weight: 'bold', size: 14}}
             },
         },
@@ -101,8 +102,8 @@ export default defineComponent({
             },
             annotation:{
                 annotations:{
-                    lineupper: {...standardlineStyle, yMin: 2.5, yMax: 2.5},
-                    linelower: {...standardlineStyle, yMin: 1.5, yMax: 1.5},
+                    lineupper: {...standardlineStyle, yMin: cData.value?.upperstd, yMax: cData.value?.upperstd},
+                    linelower: {...standardlineStyle, yMin: cData.value?.lowerstd, yMax: cData.value?.lowerstd},
                 }
             },
             tooltip:{
@@ -123,12 +124,18 @@ export default defineComponent({
 
         const fnPointClick = (items: any)=>{
             let files:string[] = [];
+            let pointsObject:ValuePositionModel[] = [];
+
             items.forEach((item:any, index:number)=>{
                 const obj = item.element.$context.raw as ValuePositionModel;
+                pointsObject.push(item);
+
                 obj.filepath.forEach((item2)=> files.push(item2))
             })
             if(files.length == 1 && files[0] == '') files = [];
-            emit('onPointClick', files)
+
+            const result:IPointObject = { pdfpath:files, pointobject: pointsObject}
+            emit('onPointClick', result)
         }
 
         const tooltip = (tooltipitems:TooltipItem<"scatter">[]):string =>{
@@ -181,7 +188,7 @@ export default defineComponent({
 })
 </script>
 
-<template>
+<template scoped>
     <div class="container">
         <v-card style="margin: 5px;">
             <div class="header">
@@ -198,20 +205,17 @@ export default defineComponent({
 <style scoped>
     .container {
         display: flex;
-        width: 100%;
+        width: auto;
         flex-direction: column;
         justify-content: start;
         align-items: stretch;
-        /* width: 99vw; */
-        /* height: 96vh; */
-        background-color: white;
     }
 
     .header{
-        background-color: #6C757D;
+        background-color: rgb(var(--v-theme-primary));
         padding: 5px 0 5px 10px;
         font-size: 24px;
         font-weight: 600;
-        color: white;
+        color: rgb(var(--v-theme-textSecondary));
     }
 </style>

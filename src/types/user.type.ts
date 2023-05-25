@@ -11,6 +11,7 @@ export const defaultIUser:IUser =
 
 export interface IAuthResp{
     username : string;
+    password : string;
     authlevel : number;
     employeeno : string;
     name : string;
@@ -23,6 +24,7 @@ export interface IAuthResp{
 export const defaultIAuthResp: IAuthResp =
 {
     username : "",
+    password : "",
     authlevel : 0,
     employeeno : "",
     name : "",

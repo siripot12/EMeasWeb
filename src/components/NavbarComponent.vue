@@ -31,6 +31,10 @@ export default defineComponent({
             router.push('/dashboard')
         }
 
+        const fnGotoAccountmanagementView = ()=>{
+            router.push('/accountmanagement')
+        }
+
         const fnLogOut = ()=>{
             loginStore.dologout();
             router.push('/login')
@@ -41,6 +45,7 @@ export default defineComponent({
             drawer,
             fnGotoRequestView,
             fnGotoDashboardView,
+            fnGotoAccountmanagementView,
             fnLogOut,
             onClickoutside
         }
@@ -50,7 +55,7 @@ export default defineComponent({
 
 <template>
     <!-- image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg" -->
-    <v-navigation-drawer 
+    <v-navigation-drawer
         background-color="secondary"
         v-model="drawer"
         temporary
@@ -69,6 +74,7 @@ export default defineComponent({
         <v-list density="compact" nav>
             <v-list-item prepend-icon="playlist_add_check" title="Measuring Request" value="home" @click="fnGotoRequestView"></v-list-item>
             <v-list-item prepend-icon="dashboard" title="Dashboard" value="about" @click="fnGotoDashboardView"></v-list-item>
+            <v-list-item v-if="loginStore.userdata?.authlevel == 1" prepend-icon="account_box" title="Account Management" @click="fnGotoAccountmanagementView"></v-list-item>
             <v-divider></v-divider>
             <v-list-item>
                 <v-btn block variant="flat" color="red" @click="fnLogOut">

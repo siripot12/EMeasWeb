@@ -3,6 +3,7 @@ import LoginView from "@/views/LoginView.vue";
 import RequestView from "@/views/RequestView.vue";
 import DashboardView from '@/views/DashboardView.vue';
 import { useLoginStore } from '@/stores/loginStore';
+import AccountmanageView from '@/views/AccountManageView.vue';
 
 
 const router = createRouter({
@@ -22,6 +23,11 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView
+    },
+    {
+      path: '/accountmanagement',
+      name: 'accountmanagement',
+      component: AccountmanageView
     }
   ]
 })

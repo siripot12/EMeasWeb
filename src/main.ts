@@ -1,4 +1,4 @@
-import { createApp, markRaw, ref } from 'vue'
+import { createApp, markRaw, onMounted, ref } from 'vue'
 import { createPinia } from 'pinia'
 
 //Vuetify
@@ -21,7 +21,6 @@ import './assets/main.css'
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-
 //Vuetify global styles
 const vuetify = createVuetify({
     theme:{
@@ -33,28 +32,21 @@ const vuetify = createVuetify({
                     primary: '#6c757d',
                     secondary: '#F5F3F5',
                     buttonPrimary: '#3F51B5',
-                    buttonSecondary: '#424242'
+                    buttonSecondary: '#424242',
+                    textPrimary:'#0A1128',
+                    textSecondary:'#FFFAFB',
+                    iconBackPrimary:'#F46036',
+                    iconBackSecondary:'#424242',
+                    iconPrimary:'#424242',
+                    iconSecondary:'#FFFAFB'
                 }
             },
-            light: {
-                colors:{
-                    background: '#FFFFFF',
-                    primary: '#25316A',
-                    secondary: '#b0bec5',
-                    accent: '#25316A',
-                    error: '#E86674',
-                    orange: '#FF7A0D',
-                    golden: '#A68C59',
-                    badge: '#F5528C',
-                    customPrimary: '#085294'
-                }
-            }
         },
-        variations:{
-            colors:['primary', 'secondary'],
-            lighten: 1,
-            darken: 2
-        }
+        // variations:{
+        //     colors:['primary', 'secondary'],
+        //     lighten: 1,
+        //     darken: 2
+        // }
     },
     defaults:{
         VBtn:{
@@ -75,23 +67,38 @@ const vuetify = createVuetify({
     directives
 });
 
+//Fetch config file
+const configpath = process.env.NODE_ENV == 'development'? '/public/config.json' : '/config.json';
+const runtimeConf = await fetch(configpath);
+const confobj:any =  await runtimeConf.json();
+const url = process.env.NODE_ENV == 'development'? confobj.apiURLDevelop : confobj.apiURLProd;
+
+axios.defaults.baseURL = url;
+//axios.defaults.baseURL = "http://10.122.79.129:7000/api";
 
 const app = createApp(App)
 
 app.use(vuetify)
 app.use(router)
 
-axios.defaults.baseURL = 'http://localhost:7118/api';
-//app.use(VueAxios, axios);
-
-//Add axios to global instance for composition api usage.
+//console.log(confobj.apiURL);
 app.provide('$axios', axios)
 
-//Create and add context to pinia.
+
 const pinia = createPinia();
 pinia.use(({store})=>{
     store.$axios = markRaw(axios);
 });
+
 app.use(pinia)
 
 app.mount('#app')
+
+//axios.defaults.baseURL = "http://192.168.68.59:7000/api"
+//app.use(VueAxios, axios);
+
+//Add axios to global instance for composition api usage.
+
+
+//Create and add context to pinia.
+

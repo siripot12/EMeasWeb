@@ -9,8 +9,8 @@ import {defineComponent, ref} from 'vue'
 
 const defprops = {
     itemsmaster:{type: undefined as PropType<MasterMachineName[]>|undefined, default: [], required:true},
-    bkiconcolor: {type:String, default:'#F46036', required: false},
-    iconcolor: {type:String, default:'#0E1428', required: false},
+    bkiconcolor: {type:String, default:'rgb(var(--v-theme-iconBackPrimary))', required: false},
+    iconcolor: {type:String, default:'rgb(var(--v-theme-iconPrimary))', required: false},
     backcolor: {type: String, default:'#F5F3F5', required: false},
     fontcolor: {type: String, default:'#1b263b', required: false},
     icon: {type: String, default: 'alarm', required:false}
@@ -50,7 +50,7 @@ export default defineComponent({
 
         <div :style="{display: 'flex', width: '100%', flexDirection: 'column', justifyContent: 'center', marginLeft: '1em', marginRight: '1em'}">
             <div>
-                <strong>Measuring station</strong>
+                <strong>Measuring Station</strong>
             </div>
 
             <div :style="{fontSize: '1.7em', fontWeight: 'bold', color: props.fontcolor}">

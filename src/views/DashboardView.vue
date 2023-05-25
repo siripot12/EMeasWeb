@@ -8,14 +8,18 @@ import CardComponent from '@/components/CardComponent.vue'
 import CardselectorComponent from '@/components/CardSelectorComponent.vue';
 import PDFSelectorComponent from '@/components/PDFSelector.vue';
 import VuePdfEmbed from 'vue-pdf-embed'
+import ModeSelectComponent from '@/components/ModeSelectComponent.vue';
+import DataactionComponent from '@/components/DataactionSelector.vue';
 
 import type { AxiosStatic } from 'axios';
 import type { DashboardItemsResponse, ValueitemsResponse } from '@/types/dashboard.type'
 import moment from 'moment'
 import { onUnmounted } from 'vue'
+import type { IModeSelect } from '@/types/IModeSelect'
+import type { IPointObject } from '@/types/IPointObject'
 
 export default defineComponent({
-    components:{ScatterChart, CardComponent, CardselectorComponent, PDFSelectorComponent, VuePdfEmbed},
+    components:{ScatterChart, CardComponent, CardselectorComponent, PDFSelectorComponent, VuePdfEmbed, ModeSelectComponent, DataactionComponent},
     setup(){
         const axios = inject<AxiosStatic>('$axios')
 
@@ -34,16 +38,19 @@ export default defineComponent({
 
         const pdfitems = ref<String[]>([]);
 
-        const isOpendialog = ref<boolean>(false)
+        const isOpendialogPDFList = ref<boolean>(false)
         const isOpendialogPDFViewer = ref<boolean>(false);
         const isOpendialogIsfetching = ref<boolean>(false);
+        const isOpendialogDataAction = ref<boolean>(false);
 
         const pdfSource = ref<String|Uint8Array>('');
         const pdfPage:number|undefined = undefined;
+        const selectedDate = ref();
 
-        const fnFetchdata = async()=>{
+        const fnFetchdata = async(date:Date|undefined)=>{
             console.log("Fetching dashboard data");
-            let res = await axios?.get<any, any>(`/Dashboard/Getdashboardvalues?partnameid=${selPartnameObj.value?.id}&processid=${selProcessObj.value?.id}`).catch((error)=>{
+            if(date == undefined) date = new Date();
+            let res = await axios?.get<any, any>(`/Dashboard/Getdashboardvalues?partnameid=${selPartnameObj.value?.id}&processid=${selProcessObj.value?.id}&date=${date.toLocaleString()}`).catch((error)=>{
                 alert(`Code : ${res.status} Message : ${res.data}`)
             })
 
@@ -54,7 +61,7 @@ export default defineComponent({
             }
         }
 
-        var timerId:number = 0;
+        var timerId:any = 0;
         onMounted(()=>{
             selRoundMaster.value = masterstore.mastervalue?.round as MasterRound[];
             selMeasuremode.value = masterstore.mastervalue?.measuremode as MasterMeasureMode[];
@@ -65,6 +72,19 @@ export default defineComponent({
             if(timerId != 0) clearInterval(timerId)
         })
 
+        const pollingDelay:number = 10000;
+        const fnOnModeselectionChanged = (item:IModeSelect)=>{
+            //Clear interval
+            if(timerId != 0) clearInterval(timerId)
+            if(item.mode == 'realtimeselected')
+            {
+                fnFetchdata(item.date)
+                timerId = setInterval(fnFetchdata, pollingDelay)
+            }
+            else if(item.mode == 'historyactive'){}
+            else if(item.mode == 'historyselected'){fnFetchdata(item.date)}
+        }
+
         const fnMachineselected = (value:MasterMachineName) =>{
             selProcessObj.value = masterstore.mastervalue?.processname.find(e=>e.id == value.processName);
             selPartnameObj.value = masterstore.mastervalue?.partname.find(e=>e.id == value.partName);
@@ -73,10 +93,10 @@ export default defineComponent({
 
             //Trigger clear charts data.
             isClear.value = !isClear.value
-            fnFetchdata();
+            fnFetchdata(undefined);
             //Set interval
             if(timerId != 0) clearInterval(timerId)
-            timerId = setInterval(fnFetchdata, 10000)
+            timerId = setInterval(fnFetchdata, pollingDelay)
         }
 
         const selectedMasterItem = (partnameid:number|undefined, processid:number|undefined):MasterMeasInstrument[] => {
@@ -85,14 +105,24 @@ export default defineComponent({
             return result as MasterMeasInstrument[];
         }
 
-        const fnOnpointClick = (items:string[])=>{
-            if(items.length == 0) return;
-            pdfitems.value = items;
-            isOpendialog.value = true;
+        var mempointsitem : IPointObject;
+        const fnOnpointClick = (items:IPointObject)=>{
+            if(items.pointobject.length == 0) return;
+            mempointsitem = items;
+            isOpendialogDataAction.value = true;
         }
 
         const fnCloseDialog = ()=>{
-            isOpendialog.value = false;
+            isOpendialogPDFList.value = false;
+        }
+
+        const fnOnselectedDataAction = (item:string)=>{
+            isOpendialogDataAction.value = false;
+            if(item == 'dataeditor') return;
+            else if(item == 'pdfselector') {
+                pdfitems.value = mempointsitem.pdfpath;
+                isOpendialogPDFList.value = true;
+            }
         }
 
         const fnConfirmOpenPdf = async(filepath:string)=>{
@@ -112,7 +142,7 @@ export default defineComponent({
             else{pdfSource.value = ''}
 
             isOpendialogIsfetching.value = false;
-            isOpendialog.value = false;
+            isOpendialogPDFList.value = false;
             isOpendialogPDFViewer.value = true;
         }
 
@@ -122,6 +152,7 @@ export default defineComponent({
             fnOnpointClick,
             fnCloseDialog,
             fnConfirmOpenPdf,
+            fnOnModeselectionChanged,
             selMeasInstrument,
             selRoundMaster,
             selMeasuremode,
@@ -131,12 +162,14 @@ export default defineComponent({
             data,
             datatimestamp,
             isClear,
-            isOpendialog,
+            isOpendialogPDFList,
             pdfitems,
             pdfSource,
             isOpendialogPDFViewer,
             isOpendialogIsfetching,
-            pdfPage
+            isOpendialogDataAction,
+            pdfPage,
+            fnOnselectedDataAction
         }
     }
 })
@@ -144,8 +177,7 @@ export default defineComponent({
 
 <template>
     <div class="container">
-
-        <v-dialog max-width="850px" persistent v-model="isOpendialog">
+        <v-dialog max-width="850px" persistent v-model="isOpendialogPDFList">
             <PDFSelectorComponent :items="pdfitems" @on-close="fnCloseDialog" @on-confirm="fnConfirmOpenPdf"/>
         </v-dialog>
 
@@ -157,7 +189,7 @@ export default defineComponent({
         </v-dialog>
 
         <v-dialog max-width="850px" v-model="isOpendialogPDFViewer">
-            <div style="background-color: #6C757D; height: 55px; display: flex; justify-content: center; align-items: center;">
+            <div style="background-color: rgb(var(--v-theme-primary)); height: 55px; display: flex; justify-content: center; align-items: center;">
                 <strong>PDF Viewer</strong>
             </div>
 
@@ -166,39 +198,47 @@ export default defineComponent({
             </div>
         </v-dialog>
 
+        <v-dialog max-width="500px" v-model="isOpendialogDataAction">
+            <DataactionComponent @on-selected="fnOnselectedDataAction"/>
+        </v-dialog>
 
-        <v-card style="background-color: #F5F3F5; margin: 5px 5px;">
-            <div style="background-color: #6C757D;">
-                <strong>Process Measuring Dashboard</strong>
+
+        <v-card style="margin: 5px 5px; z-index: 1;">
+            <div style="background-color: rgb(var(--v-theme-primary));">
+                <strong style="color: rgb(var(--v-theme-textSecondary));">Process Measuring Dashboard</strong>
                 <!-- <v-btn @click="fnFetchdata">Fetch</v-btn> -->
             </div>
             <div style="padding: 15px;">
                 <v-row>
-                    <v-col sm="6" md="3"> <CardselectorComponent :itemsmaster="selMachinemster" icon="laptop_mac" @on-selected="fnMachineselected"/> </v-col>
-                    <v-col sm="6" md="3"> <CardComponent title="Partname" :content="selPartnameObj?.name" icon="memory"/> </v-col>
-                    <v-col sm="6" md="3"> <CardComponent title="Process" :content="selProcessObj?.name" icon="developer_board"/> </v-col>
-                    <v-col sm="6" md="3"> <CardComponent title="Timestamp" :content="datatimestamp"/> </v-col>
+                    <v-col cols="12"  sm="6" md="6" lg="3"> <ModeSelectComponent icon="calendar_month" @on-selected-date="fnOnModeselectionChanged"/> </v-col>
+                    <v-col cols="12"  sm="6" md="6" lg="3"> <CardselectorComponent :itemsmaster="selMachinemster" icon="laptop_mac" @on-selected="fnMachineselected"/> </v-col>
+                    <v-col cols="12"  sm="6" md="6" lg="2"> <CardComponent title="Partname" :content="selPartnameObj?.name" icon="memory"/> </v-col>
+                    <v-col cols="12"  sm="6" md="6" lg="2"> <CardComponent title="Process" :content="selProcessObj?.name" icon="developer_board"/> </v-col>
+                    <v-col cols="12"  sm="6" md="6" lg="2"> <CardComponent title="Timestamp" :content="datatimestamp"/> </v-col>
                 </v-row>
             </div>
         </v-card>
 
         <!-- No register item -->
-        <div v-if="selMeasInstrument == undefined || selMeasInstrument.length == 0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: #6C757D; margin: 10px;">
+        <div v-if="selMeasInstrument == undefined || selMeasInstrument.length == 0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 200px; background-color: rgb(var(--v-theme-primary)); margin: 10px;">
             <v-icon icon="report" size="100" color="red"></v-icon>
             <strong>No Registering item.</strong>
         </div>
-        <ul v-else>
-            <li v-for="(item, index) in selMeasInstrument">
-                <ScatterChart :title='(item.name as string)' @on-point-click="fnOnpointClick" :roundmster="selRoundMaster" :measuremodemaster="selMeasuremode" :data="data?.find(e=>e.id == item.id)" :clear="isClear"></ScatterChart>
-            </li>
-        </ul>
+        
+        <div v-else style="padding:  0px 10px;">
+            <v-row class="mt-0">
+                <v-col cols="12" sm="12" md="12" lg="12" xl="6" xxl="6" v-for="(item, index) in selMeasInstrument" style="padding: 0px;">
+                    <ScatterChart :title='(item.name as string)' @on-point-click="fnOnpointClick" :roundmster="selRoundMaster" :measuremodemaster="selMeasuremode" :data="data?.find(e=>e.id == item.id)" :clear="isClear"></ScatterChart>
+                </v-col>
+            </v-row>
+        </div>
     </div>
 </template>
 
 <style scoped>
     .container {
         display: flex;
-        width: 100vw;
+        width: 100%;
         flex-direction: column;
         justify-content: start;
         align-items: stretch;
@@ -209,6 +249,12 @@ export default defineComponent({
 
     .v-col {
         padding: 5px 5px;
+        position: fixed;
+        z-index: 0;
+    }
+
+    .v-col-md-6{
+        padding: 4px;
     }
 
     div strong{

@@ -30,7 +30,7 @@ export default defineComponent({
             <v-app-bar-nav-icon @click.stop="fnChangeDrawer" style=""></v-app-bar-nav-icon>
         </template>
 
-        <v-app-bar-title>
+        <v-app-bar-title color="textSecondary">
             {{ title }}
         </v-app-bar-title>
 
@@ -42,7 +42,7 @@ export default defineComponent({
 
 <style scoped>
     ::v-deep .v-btn--icon .v-icon{
-        color: white;
+        color: rgb(var(--v-theme-textSecondary));
         font-size: 32px;
     }
 </style>

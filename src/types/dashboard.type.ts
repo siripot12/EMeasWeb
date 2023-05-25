@@ -1,4 +1,6 @@
 export interface ValuePositionModel{
+    metaid : number;
+    measuretypeid : number;
     round : number;
     qrcode : string;
     value : number;
@@ -25,6 +27,8 @@ export interface TypevalueResponse{
 export interface ValueitemsResponse{
     itemname: string;
     id : number;
+    upperstd : number;
+    lowerstd : number;
     values : TypevalueResponse[];
 }
 

@@ -51,19 +51,19 @@ export default defineComponent({
                         >
                             <v-item v-slot="{ isSelected, toggle }">
                                 <v-card
-                                    :color="isSelected ? '#F46036' : 'secondary'"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
                                     class="align-center"
                                     style="display: flex; flex-direction: column; justify-content: center;"
                                     :height="isSelected ? '80px' : '50px'"
                                     @click="toggle"
                                 >
-                                        <div v-if="isSelected" class="text-h5 text-center prevent-select">
-                                            [Selected]
-                                        </div>
+                                    <div v-if="isSelected" class="text-h5 text-center prevent-select">
+                                        [Selected]
+                                    </div>
 
-                                        <div class="text-h6 text-center prevent-select" >
-                                            {{item}}
-                                        </div>
+                                    <div class="text-h6 text-center prevent-select" >
+                                        {{item}}
+                                    </div>
 
                                     <!-- <v-scroll-y-transition style="display: flex; flex-direction: column;">
 
