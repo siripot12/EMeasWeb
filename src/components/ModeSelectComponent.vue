@@ -31,7 +31,7 @@ export default defineComponent({
         onMounted(()=>{
             date.value = Date.now();
             selection.value = 0;
-            
+
         })
 
         watch(selection,(item)=>{
@@ -53,11 +53,13 @@ export default defineComponent({
                 // @ts-ignore
                 //console.log(dp.value?.openMenu())
 
-                
+
             }
         });
 
         const fnOnPickerSelected = (item:Date)=>{
+            //Fix hour to 8 for history mode.
+            item.setHours(8);
             const resultObj:IModeSelect = {date: item, mode: 'historyselected'}
             emit('onSelectedDate', resultObj)
         }
@@ -124,12 +126,12 @@ export default defineComponent({
 
             <!-- <v-dialog v-model="isDialog" style="left: 40%;">
                 <VueDatePicker v-model="date" inline model-auto/>
-                
+
             </v-dialog> -->
         </div>
     </v-card>
 
-    
+
 </template>
 
 <style scoped>

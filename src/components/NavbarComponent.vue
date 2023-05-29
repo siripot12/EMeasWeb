@@ -35,6 +35,10 @@ export default defineComponent({
             router.push('/accountmanagement')
         }
 
+        const fnGotoMasterSetting = ()=>{
+            router.push('/mastersetting')
+        }
+
         const fnLogOut = ()=>{
             loginStore.dologout();
             router.push('/login')
@@ -47,7 +51,8 @@ export default defineComponent({
             fnGotoDashboardView,
             fnGotoAccountmanagementView,
             fnLogOut,
-            onClickoutside
+            onClickoutside,
+            fnGotoMasterSetting
         }
     }
 })
@@ -74,7 +79,10 @@ export default defineComponent({
         <v-list density="compact" nav>
             <v-list-item prepend-icon="playlist_add_check" title="Measuring Request" value="home" @click="fnGotoRequestView"></v-list-item>
             <v-list-item prepend-icon="dashboard" title="Dashboard" value="about" @click="fnGotoDashboardView"></v-list-item>
+            <v-divider></v-divider>
             <v-list-item v-if="loginStore.userdata?.authlevel == 1" prepend-icon="account_box" title="Account Management" @click="fnGotoAccountmanagementView"></v-list-item>
+            <v-divider></v-divider>
+            <v-list-item v-if="loginStore.userdata?.authlevel == 1" prepend-icon="settings_suggest" title="MasterSetting" @click="fnGotoMasterSetting"></v-list-item>
             <v-divider></v-divider>
             <v-list-item>
                 <v-btn block variant="flat" color="red" @click="fnLogOut">

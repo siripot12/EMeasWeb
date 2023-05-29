@@ -15,14 +15,16 @@ const defaultConfirmationRes: IconfirmationRes = {
 export async function confirmation(title:string, text:string, ): Promise<IconfirmationRes>
 {
     var res = await Swal.fire({
+        toast:true,
         icon: 'question',
         title: title,
         text: text,
-        allowOutsideClick: false,
+        // allowOutsideClick: false,
         showCancelButton: true,
         confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-    })
+        cancelButtonText: 'No',
+    }
+    )
 
     if(res.dismiss) return {...defaultConfirmationRes, isdimiss: true}
     else if(res.isConfirmed) return {...defaultConfirmationRes, isconfirm: true}
@@ -32,10 +34,11 @@ export async function confirmation(title:string, text:string, ): Promise<Iconfir
 export async function alert(title:string, text:string):Promise<any>
 {
     var res = await Swal.fire({
+        toast:true,
         icon:'error',
         title:title,
         text:text,
-        allowOutsideClick: false,
+        // allowOutsideClick: false,
         showCancelButton:false,
         showConfirmButton:true,
         confirmButtonText: 'Acknowledge'
@@ -47,10 +50,11 @@ export async function alert(title:string, text:string):Promise<any>
 export async function success(title:string, text:string):Promise<any>
 {
     var res = await Swal.fire({
+        toast:true,
         icon:'success',
         title:title,
         text:text,
-        allowOutsideClick: false,
+        // allowOutsideClick: false,
         showCancelButton:false,
         showConfirmButton:true,
         confirmButtonText: 'Acknowledge'

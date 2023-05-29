@@ -8,7 +8,6 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import type {MasterMeasureMode, MasterRound} from '@/types/master.type';
 import { onMounted } from 'vue';
 import type { ValuePositionModel, ValueitemsResponse } from '@/types/dashboard.type';
-import { ssrContextKey } from 'vue';
 import type { IPointObject } from '@/types/IPointObject';
 
 
@@ -118,7 +117,9 @@ export default defineComponent({
         }));
 
         onMounted(()=>{
-            suggestXMax.value = props.roundmster.length;
+            // suggestXMax.value = props.roundmster.length;
+            let iditems = props.roundmster.map(e=>e.id)
+            suggestXMax.value = Math.max(...iditems);
             _datasets.value = datasetMapping();
         })
 
@@ -128,7 +129,7 @@ export default defineComponent({
 
             items.forEach((item:any, index:number)=>{
                 const obj = item.element.$context.raw as ValuePositionModel;
-                pointsObject.push(item);
+                pointsObject.push(obj);
 
                 obj.filepath.forEach((item2)=> files.push(item2))
             })
@@ -154,11 +155,12 @@ export default defineComponent({
 
                 context += `Machining lot : ${(e.raw as ValuePositionModel).machininglot}\n`
                 context += `Remark : ${(e.raw as ValuePositionModel).remark}\n`
+                context += `Comment : ${(e.raw as ValuePositionModel).comment}\n`
                 context +=`-------------------------------------------------\n`
             })
             return `${context}`
         }
-
+        
         const datasetMapping = ():ChartDataset<"scatter", ValuePositionModel[]>[]=>{
             var items = props.measuremodemaster.map((e, index) => {
                 return {...dataset, label: e.name, data: [], backgroundColor: colors[index]}
@@ -167,7 +169,7 @@ export default defineComponent({
         }
 
         const roundMapping = (elementitem:any):string=>{
-            var result = props.roundmster.find(e=>e.id === elementitem as number)?.name;
+            var result = props.roundmster.find(e =>e.id === elementitem as number)?.name;
             return result as string;
         }
 

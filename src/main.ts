@@ -18,9 +18,6 @@ import axios, { Axios } from 'axios'
 import VueAxios from "vue-axios";
 import './assets/main.css'
 
-import VueSweetalert2 from 'vue-sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
-
 //Vuetify global styles
 const vuetify = createVuetify({
     theme:{

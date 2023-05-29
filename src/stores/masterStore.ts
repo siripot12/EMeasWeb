@@ -86,6 +86,10 @@ export const useMasterStore = defineStore('masterStore',
         gettraynumberbyvalue(value:number):string{
             let obj = this.mastervalue?.traynumber.find(e=>e.value == value)
             return obj != undefined? obj.name:'-'
+        },
+        getmeasuretypebyindex(index:number):string{
+            let obj = this.mastervalue?.measuretype.find(e=>e.id == index)
+            return obj != undefined? obj.name:'-'
         }
 
     },

@@ -434,6 +434,7 @@ export default defineComponent({
 
                 <v-row>
                     <v-col cols="6" class="colcontainer">
+                        <strong>Lot. Maching</strong>
                         <v-text-field
                             label="Lot machining"
                             variant="solo"
@@ -443,6 +444,7 @@ export default defineComponent({
                     </v-col>
 
                     <v-col cols="6" class="colcontainer">
+                        <strong>Auth. Level</strong>
                         <v-text-field
                             type="remark"
                             label="Remark"

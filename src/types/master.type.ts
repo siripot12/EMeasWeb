@@ -1,3 +1,9 @@
+export interface MasterMeasuretype{
+    id : number;
+    name : string;
+    mode : number;
+}
+
 export interface MasterMeasureMode{
     id : number;
     name : string;
@@ -30,11 +36,15 @@ export const defaultMasterPartname:MasterPartName = {
 
 export interface MasterProcessName{
     id : number;
+    partnameId: number;
+    processId : number;
     name : string;
 }
 
 export const defaultMasterProcessname:MasterProcessName = {
     id : 0,
+    partnameId: 0,
+    processId: 0,
     name : ''
 }
 
@@ -143,4 +153,5 @@ export interface AllMasterResp{
     round : MasterRound[];
     traynumber : MasterTrayNumber[];
     measinstrument: MasterMeasInstrument[];
+    measuretype : MasterMeasuretype[];
 }

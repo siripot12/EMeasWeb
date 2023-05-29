@@ -10,16 +10,19 @@ import PDFSelectorComponent from '@/components/PDFSelector.vue';
 import VuePdfEmbed from 'vue-pdf-embed'
 import ModeSelectComponent from '@/components/ModeSelectComponent.vue';
 import DataactionComponent from '@/components/DataactionSelector.vue';
+import DataeditorComponent from '@/components/DataEditorComponent.vue'
 
 import type { AxiosStatic } from 'axios';
-import type { DashboardItemsResponse, ValueitemsResponse } from '@/types/dashboard.type'
+import type { DashboardItemsResponse, ValuePositionModel, ValueitemsResponse } from '@/types/dashboard.type'
 import moment from 'moment'
 import { onUnmounted } from 'vue'
 import type { IModeSelect } from '@/types/IModeSelect'
 import type { IPointObject } from '@/types/IPointObject'
+import {confirmation, alert, success} from "@/components/sweetalert/sweetalert";
+import type VueSweetalert2 from 'vue-sweetalert2'
 
 export default defineComponent({
-    components:{ScatterChart, CardComponent, CardselectorComponent, PDFSelectorComponent, VuePdfEmbed, ModeSelectComponent, DataactionComponent},
+    components:{ScatterChart, CardComponent, CardselectorComponent, PDFSelectorComponent, VuePdfEmbed, ModeSelectComponent, DataactionComponent, DataeditorComponent},
     setup(){
         const axios = inject<AxiosStatic>('$axios')
 
@@ -42,16 +45,20 @@ export default defineComponent({
         const isOpendialogPDFViewer = ref<boolean>(false);
         const isOpendialogIsfetching = ref<boolean>(false);
         const isOpendialogDataAction = ref<boolean>(false);
+        const isOpendialogDataeditor = ref<boolean>(false);
+        const isOpendialogFetchingdata = ref<boolean>(false);
 
         const pdfSource = ref<String|Uint8Array>('');
         const pdfPage:number|undefined = undefined;
         const selectedDate = ref();
 
+        const stateisFetching = ref<boolean>(false);
+
         const fnFetchdata = async(date:Date|undefined)=>{
-            console.log("Fetching dashboard data");
+            stateisFetching.value = true;
             if(date == undefined) date = new Date();
             let res = await axios?.get<any, any>(`/Dashboard/Getdashboardvalues?partnameid=${selPartnameObj.value?.id}&processid=${selProcessObj.value?.id}&date=${date.toLocaleString()}`).catch((error)=>{
-                alert(`Code : ${res.status} Message : ${res.data}`)
+                alert(`Error`, `Code : ${res.status} Message : ${res.data}`)
             })
 
             if(res.status === 200){
@@ -59,6 +66,8 @@ export default defineComponent({
                 data.value = obj.values;
                 datatimestamp.value = moment(obj.timestamp).format("hh:mm:ss");
             }
+            isOpendialogFetchingdata.value = false;
+            stateisFetching.value = false;
         }
 
         var timerId:any = 0;
@@ -73,16 +82,22 @@ export default defineComponent({
         })
 
         const pollingDelay:number = 10000;
-        const fnOnModeselectionChanged = (item:IModeSelect)=>{
+        var memoryIModeSelect:IModeSelect|undefined;
+        const fnOnModeselectionChanged = (item:IModeSelect|undefined)=>{
+            //Update memory
+            if(item == undefined) item = memoryIModeSelect;
+            else memoryIModeSelect = item;
+
             //Clear interval
             if(timerId != 0) clearInterval(timerId)
-            if(item.mode == 'realtimeselected')
+            if(item?.mode == 'realtimeselected')
             {
+                isOpendialogFetchingdata.value = true;
                 fnFetchdata(item.date)
                 timerId = setInterval(fnFetchdata, pollingDelay)
             }
-            else if(item.mode == 'historyactive'){}
-            else if(item.mode == 'historyselected'){fnFetchdata(item.date)}
+            else if(item?.mode == 'historyactive'){}
+            else if(item?.mode == 'historyselected'){ isOpendialogFetchingdata.value = true; fnFetchdata(item.date);}
         }
 
         const fnMachineselected = (value:MasterMachineName) =>{
@@ -106,7 +121,7 @@ export default defineComponent({
         }
 
         var mempointsitem : IPointObject;
-        const fnOnpointClick = (items:IPointObject)=>{
+        const fnOnpointClick = async(items:IPointObject)=>{
             if(items.pointobject.length == 0) return;
             mempointsitem = items;
             isOpendialogDataAction.value = true;
@@ -116,9 +131,16 @@ export default defineComponent({
             isOpendialogPDFList.value = false;
         }
 
+        const selectedDataitem = ref<ValuePositionModel>();
         const fnOnselectedDataAction = (item:string)=>{
             isOpendialogDataAction.value = false;
-            if(item == 'dataeditor') return;
+            if(item == 'dataeditor'){
+                if(mempointsitem.pointobject.length > 0)
+                {
+                    selectedDataitem.value = mempointsitem.pointobject[0];
+                    isOpendialogDataeditor.value = true;
+                }
+            }
             else if(item == 'pdfselector') {
                 pdfitems.value = mempointsitem.pdfpath;
                 isOpendialogPDFList.value = true;
@@ -130,7 +152,7 @@ export default defineComponent({
             //pdfSource.value = 'http://localhost:7118/api/Pdf/readpdffromserver?filesubpath=%2FNeedle%2FEdgeless%2FRoundness%2F2023%2F05%2F20%2FEMEAS_20230520_072036-RE.pdf'
             isOpendialogIsfetching.value = true;
             let res = await axios?.get<any, any>(`/Pdf/readpdffromserver?filesubpath=${filepath}`, {responseType:'blob'}).catch((error)=>{
-                alert(`Code : ${res.status} Message : ${res.data}`)
+                alert(`Error`, `Code : ${res.status} Message : ${res.data}`)
             })
 
             if(res.status == 200)
@@ -146,6 +168,16 @@ export default defineComponent({
             isOpendialogPDFViewer.value = true;
         }
 
+        const fncloseDataEditor = ()=>{
+            isOpendialogDataeditor.value = false;
+        }
+
+        const fnOnsubmitDataEditor = async()=>{
+            isOpendialogDataeditor.value = false;
+            success('Complete', 'Edit data complete')
+            fnOnModeselectionChanged(undefined);
+        }
+
         return{
             fnFetchdata,
             fnMachineselected,
@@ -153,6 +185,7 @@ export default defineComponent({
             fnCloseDialog,
             fnConfirmOpenPdf,
             fnOnModeselectionChanged,
+            fncloseDataEditor,
             selMeasInstrument,
             selRoundMaster,
             selMeasuremode,
@@ -168,8 +201,13 @@ export default defineComponent({
             isOpendialogPDFViewer,
             isOpendialogIsfetching,
             isOpendialogDataAction,
+            isOpendialogDataeditor,
+            isOpendialogFetchingdata,
+            stateisFetching,
             pdfPage,
-            fnOnselectedDataAction
+            fnOnselectedDataAction,
+            fnOnsubmitDataEditor,
+            selectedDataitem
         }
     }
 })
@@ -177,6 +215,13 @@ export default defineComponent({
 
 <template>
     <div class="container">
+        <v-dialog max-width="400px" persistent v-model="isOpendialogFetchingdata">
+            <v-card style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+                <v-icon icon="autorenew" size="76" color="blue"></v-icon>
+                <strong style="color: blue; font-size: 22px;">Fetching master data from server.</strong>
+            </v-card>
+        </v-dialog>
+
         <v-dialog max-width="850px" persistent v-model="isOpendialogPDFList">
             <PDFSelectorComponent :items="pdfitems" @on-close="fnCloseDialog" @on-confirm="fnConfirmOpenPdf"/>
         </v-dialog>
@@ -202,12 +247,18 @@ export default defineComponent({
             <DataactionComponent @on-selected="fnOnselectedDataAction"/>
         </v-dialog>
 
+        <v-dialog persistent max-width="800px" v-model="isOpendialogDataeditor">
+            <DataeditorComponent :data="selectedDataitem" @on-close="fncloseDataEditor" @on-submitted="fnOnsubmitDataEditor"/>
+        </v-dialog>
+
 
         <v-card style="margin: 5px 5px; z-index: 1;">
             <div style="background-color: rgb(var(--v-theme-primary));">
                 <strong style="color: rgb(var(--v-theme-textSecondary));">Process Measuring Dashboard</strong>
+                <v-icon v-if="stateisFetching" style="position: absolute; top: 20%; left: 97%; color: lime;" icon="downloading"></v-icon>
                 <!-- <v-btn @click="fnFetchdata">Fetch</v-btn> -->
             </div>
+
             <div style="padding: 15px;">
                 <v-row>
                     <v-col cols="12"  sm="6" md="6" lg="3"> <ModeSelectComponent icon="calendar_month" @on-selected-date="fnOnModeselectionChanged"/> </v-col>

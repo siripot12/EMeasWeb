@@ -7,7 +7,7 @@ export default defineComponent({
     emits:['onSelected'],
     setup(props, {emit}){
         const loginstore = useLoginStore();
-        const selection = ref<number>(0);
+        const selection = ref<number|undefined>(undefined);
 
         watch(selection,(item)=>{
             let result:string = '';

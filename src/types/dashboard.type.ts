@@ -1,6 +1,8 @@
 export interface ValuePositionModel{
     metaid : number;
-    measuretypeid : number;
+    dataid : number;
+    measuringitemid : number;
+    measuringtypeid : number;
     round : number;
     qrcode : string;
     value : number;
@@ -10,6 +12,7 @@ export interface ValuePositionModel{
     remark : string;
     jignumber : number;
     itemnumber : number;
+    comment : string;
 }
 
 // export const defaultValuePositionModel: ValuePositionModel = {
