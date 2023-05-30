@@ -7,12 +7,13 @@ import MasterRoundComponent from '@/components/MasterSetting/MasterRoundComponen
 import MasterMachinenameComponent from '@/components/MasterSetting/MasterMachinenameComponent.vue';
 import MasterProcessnameComponent from '@/components/MasterSetting/MasterProcessnameComponent.vue';
 import MasterMeasuretypeComponent from '@/components/MasterSetting/MasterMeasuretypeComponent.vue'
+import MasterMeasureInstComponent from '@/components/MasterSetting/MasterMeasureInstComponent.vue'
 import { useMasterStore } from '@/stores/masterStore';
 import type { MasterMeasureMode } from '@/types/master.type';
 
 
 export default defineComponent({
-    components:{MastermeasuremodeComponent, MasterPartnumberComponent, MasterPartnameComponent, MasterRoundComponent, MasterMachinenameComponent, MasterProcessnameComponent, MasterMeasuretypeComponent},
+    components:{MastermeasuremodeComponent, MasterPartnumberComponent, MasterPartnameComponent, MasterRoundComponent, MasterMachinenameComponent, MasterProcessnameComponent, MasterMeasuretypeComponent, MasterMeasureInstComponent},
     setup(){
         const selection = ref<number>(0);
         const masterstore = useMasterStore();
@@ -33,117 +34,135 @@ export default defineComponent({
             </div>
         </v-card>
 
-        <v-card style="display: flex;">
-            <v-item-group v-model="selection" mandatory style="max-width: 200px;">
-                <v-row style="margin: 0px;">
-                    <v-col cols="12" style="display: flex; justify-content: center;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Measure Mode</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+        <v-card>
+            <div style="width: 200px;float: left; padding: 10px 10px;">
+                <v-item-group v-model="selection" mandatory>
+                    <v-row style="margin: 0px;">
+                        <v-col cols="12" style="display: flex; justify-content: center;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Measure Mode</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Partnumber</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Partnumber</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Partname</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Partname</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Round</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Round</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Machine Name</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Machine Name</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Processname</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Processname</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-                    <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
-                        <v-item v-slot="{ isSelected, toggle }">
-                            <v-card
-                                style="height: 5em; width:100%"
-                                :color="isSelected ? 'iconBackPrimary' : ''"
-                                class="d-flex align-center justify-center"
-                                @click="toggle"
-                            >
-                                <div style="font-size: 0.5em; text-align: center;">
-                                    <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Measure Type</strong>
-                                </div>
-                            </v-card>
-                        </v-item>
-                    </v-col>
-                </v-row>
-            </v-item-group>
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Measure Type</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
 
-            <div style="background-color: red; width: 100%; height: 100%;">
+                        <v-col cols="12" style="display: flex; justify-content: center; width: 100%;">
+                            <v-item v-slot="{ isSelected, toggle }">
+                                <v-card
+                                    style="height: 5em; width:100%"
+                                    :color="isSelected ? 'iconBackPrimary' : 'secondary'"
+                                    class="d-flex align-center justify-center"
+                                    @click="toggle"
+                                >
+                                    <div style="font-size: 0.5em; text-align: center;">
+                                        <strong :class="{'selectorTextSelected' : isSelected, 'selectorTextDeselected' : !isSelected}">Instrument Items</strong>
+                                    </div>
+                                </v-card>
+                            </v-item>
+                        </v-col>
+                    </v-row>
+                </v-item-group>
+            </div>
+            
+
+            <div style="margin-left: 200px;">
                 <div v-if="selection == 0">
                     <mastermeasuremode-component :masteritems="(masterstore.mastervalue?.measuremode)"/>
                 </div>
@@ -171,6 +190,14 @@ export default defineComponent({
                 <div v-if="selection == 6">
                     <master-measuretype-component :masteritems="masterstore.mastervalue?.measuretype"/>
                 </div>
+
+                <div v-if="selection == 7">
+                    <master-measure-inst-component
+                    :masteritems="masterstore.mastervalue?.measinstrument"
+                    :masterpartname="masterstore.mastervalue?.partname"
+                    :masterprocessname="masterstore.mastervalue?.processname"
+                    :mastermeastype="masterstore.mastervalue?.measuretype"/>
+                </div>
             </div>
         </v-card>
     </div>
@@ -189,11 +216,12 @@ export default defineComponent({
     div strong{
         text-align: center;
         color: white;
-        font-size: 24px;
+        font-size: 20px;
     }
 
     .v-col{
         padding: 0px;
+        margin: 2px 0px;
     }
 
     .selectorTextSelected{

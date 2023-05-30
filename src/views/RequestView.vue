@@ -236,7 +236,7 @@ export default defineComponent({
             </template>
 
             <template v-slot:item.process="{item}">
-                {{masterstore.getprocessbyindex(item.raw.process)}}
+                {{masterstore.getprocessbyindex(item.raw.partname, item.raw.process)}}
             </template>
 
             <template v-slot:item.round="{item}">

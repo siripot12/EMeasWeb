@@ -252,6 +252,7 @@ export default defineComponent({
                             <v-col class="col-column" cols="12" sm="12" style="display: flex;">
                                 <strong>Id</strong>
                                 <v-select
+                                    :class="{ 'selector-disable':isEdit }"
                                     :items="iditem"
                                     variant="solo"
                                     v-model="selectedMasterObj.id"
@@ -424,5 +425,9 @@ export default defineComponent({
 
     .v-col-12, .v-col-sm-12{
         padding: 0px;
+    }
+
+    .selector-disable ::v-deep.v-select .v-field.v-field{
+        background-color: rgb(var(--v-theme-secondary))
     }
 </style>

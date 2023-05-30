@@ -13,7 +13,7 @@ import { watch } from 'vue';
 import { useLoginStore } from '@/stores/loginStore';
 import { inject } from 'vue';
 import type { AxiosStatic } from 'axios';
-
+import {rulerequired, rulerequiredselectNumber, rulerequiredselectObject, rulerequiredselectNumberWith0, rulerequiredNumber, rulestringconsistCSV} from '@/components/MasterSetting/validationrule'
 import {confirmation, alert, success} from "@/components/sweetalert/sweetalert";
 
 
@@ -30,6 +30,7 @@ export default defineComponent({
     props: defprops,
     emits:['onAdd', 'onEdit', 'onClose'],
     setup(props,{emit}){
+        const myform = ref(null)
         const axios = inject<AxiosStatic>('$axios')
 
         const loginstore = useLoginStore();
@@ -44,7 +45,7 @@ export default defineComponent({
         const inmeasuremode = ref<MasterMeasureMode>({...defaultIMasterMeasureMode})
         const inpartnumber = ref<MasterPartnumber>({...defaultMasterpartnumber})
         const inpartname = ref<MasterPartName>({...defaultMasterPartname})
-        const inprocess = ref<MasterProcessName>({...defaultMasterProcessname})
+        const inprocess = ref<MasterProcessName|undefined>({...defaultMasterProcessname})
         const initemnumber = ref<MasterItemNumber>({...defaultMasterItemnumber})
         const inround = ref<MasterRound>({...defaultMasterround})
         const inmachinenumber = ref<MasterMachineName>({...defaultMastermachinename})
@@ -61,20 +62,10 @@ export default defineComponent({
         const isQrChanged = ref<boolean>(false);
         const isLockConfirm = ref<boolean>(false);
 
+        const isUpdateprocess = ref<boolean>(false);
+
         //Rules
         var valid = ref<boolean>(false)
-        const required = (propertyType:any) =>{
-            return (v:string)=> (v && v.length > 0) || `You must input a ${propertyType}`
-        }
-        const requiredcombobox = (value:any) => {
-            if(typeof value === 'string' || value instanceof String) return 'Item must be selected';
-            //if (value instanceof Array && value.length == 0) return 'This field is required1.';
-            if((value && value.id === 0) || (value == undefined)) return  'This field is Required'
-            return true
-        }
-        const minLength = (propertyType:string, minLength: number) => {
-            return (v:string)=>(v && v.length >= minLength) || `${propertyType} must be less than ${minLength} characters`
-        }
 
         onMounted(()=>{
             if(props.data === undefined || props.data.id === 0){
@@ -92,6 +83,7 @@ export default defineComponent({
                 editeddata.value = {...originaldata.value}
             }
 
+            setTimeout(()=>{isUpdateprocess.value = true;},200);
             initialUi();
         });
 
@@ -102,8 +94,8 @@ export default defineComponent({
             inpartnumber.value = partnumber? partnumber:{...defaultMasterpartnumber}
             const partname = masterStore.mastervalue?.partname.find(e=>e.id == originaldata.value.partname)
             inpartname.value = partname? partname: {...defaultMasterPartname}
-            const processname = masterStore.mastervalue?.processname.find(e=>e.id == originaldata.value.process)
-            inprocess.value = processname? processname:{...defaultMasterProcessname}
+            const processname = masterStore.mastervalue?.processname.find(e=>e.processId == originaldata.value.process && e.partnameId == originaldata.value.partname)
+            inprocess.value = processname? processname : undefined
             const machineitem = masterStore.mastervalue?.machineitems.find(e=>e.value == originaldata.value.itemnumber)
             initemnumber.value = machineitem? machineitem:{...defaultMasterItemnumber}
             const round = masterStore.mastervalue?.round.find(e=>e.id == originaldata.value.round)
@@ -173,6 +165,11 @@ export default defineComponent({
         }
 
         const fnclick = async()=>{
+            //Recall validate.
+            // @ts-ignore
+            await myform.value?.validate();
+            if(!valid.value) return;
+
             let res:any
             if(isOperationMode === 'add') res = await fnSendAddData()
             else if(isOperationMode === 'edit') res = await fnSendEditData()
@@ -195,12 +192,13 @@ export default defineComponent({
         }
 
         const fncheckLockConfirm = ()=>{
-            console.log(inmeasuremode.value.id);
             if(isUseOriginalQr.value && inmeasuremode.value.id == 1) isLockConfirm.value = true;
             else isLockConfirm.value = false;
         }
 
         return{
+            rulerequired,
+            rulerequiredselectObject,
             titel,
             fnModeSelectChanged,
             fnQrgenerate,
@@ -227,12 +225,11 @@ export default defineComponent({
             inremark,
             intraynumber,
             valid,
-            required,
-            requiredcombobox,
-            minLength,
             isUseOriginalQr,
             isQrChanged,
-            isLockConfirm
+            isLockConfirm,
+            isUpdateprocess,
+            myform
         }
     },
     watch:{
@@ -257,8 +254,9 @@ export default defineComponent({
             this.fnModeSelectChanged();
         },
         inpartnumber(){this.editeddata = {...this.editeddata, partnumber: this.inpartnumber? this.inpartnumber.name : ''}; this.fnQrgenerate();},
-        inpartname(){if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},
-        inprocess(){if(typeof this.inprocess === 'string') return; this.editeddata = {...this.editeddata, process: this.inprocess? this.inprocess.id:0}; this.fnQrgenerate();},
+        inpartname(){if(this.isUpdateprocess)this.inprocess = undefined;  if(typeof this.inpartname === 'string') return; this.editeddata = {...this.editeddata, partname: this.inpartname? this.inpartname.id:0}; this.fnQrgenerate();},
+        inprocess(){if(typeof this.inprocess === 'string') return; this.editeddata = {...this.editeddata, process: this.inprocess? this.inprocess.processId:0}; this.fnQrgenerate();},
+
         initemnumber(){if(typeof this.initemnumber === 'string') return; this.editeddata = {...this.editeddata, itemnumber: this.initemnumber? this.initemnumber.value:0}; this.fnQrgenerate();},
         inmachinenumber(){if(typeof this.inmachinenumber === 'string') return; this.editeddata = {...this.editeddata, machinenumber: this.inmachinenumber? this.inmachinenumber.id:0}; this.fnQrgenerate();},
         inround(){if(typeof this.inround === 'string') return; this.editeddata = {...this.editeddata, round: this.inround? this.inround.id:0}; this.fnQrgenerate();},
@@ -286,7 +284,7 @@ export default defineComponent({
         </v-card-title>
 
         <v-card-text style="padding-top: 0px;">
-            <v-form v-model="valid">
+            <v-form ref="myform" v-model="valid" @submit.prevent="fnclick">
                 <v-container style="padding-top: 0px;">
                 <v-row>
                     <v-col cols="8" offset="0" style="display: flex;">
@@ -297,7 +295,7 @@ export default defineComponent({
                             v-model="inQrcode"
                             variant="solo"
                             type="qrcode"
-                            :rules="[required('qrcode'), minLength('qrcode', 28)]"
+                            :rules="[rulerequired]"
                         ></v-text-field>
                         <div style="width: 140px; display: flex; flex-direction: column;" >
                             <v-checkbox label="Lock" v-model="isUseOriginalQr" color="#F46036" messages="(Except normal)"></v-checkbox>
@@ -320,115 +318,124 @@ export default defineComponent({
 
                 <v-row>
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Measuring mode"
                             :items="masterStore.mastervalue?.measuremode"
                             item-title="name"
                             item-value="id"
                             variant="solo"
                             v-model="inmeasuremode"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Part number"
                             :items="masterStore.mastervalue?.partnumber"
                             item-title="name"
                             item-value="id"
                             v-model="inpartnumber"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="2" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Part name"
                             :items="masterStore.mastervalue?.partname"
                             item-title="name"
                             item-value="id"
                             v-model="inpartname"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="4" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Process"
-                            :items="masterStore.mastervalue?.processname"
+                            :items="masterStore.mastervalue?.processname.filter(e=> e.partnameId == editeddata.partname)"
                             item-title="name"
                             item-value="id"
                             v-model="inprocess"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
                 </v-row>
 
                 <v-row >
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Item number"
                             :items="masterStore.mastervalue?.machineitems"
                             item-title="name"
                             item-value="id"
                             v-model="initemnumber"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Round"
                             :items="masterStore.mastervalue?.round"
                             item-title="name"
                             item-value="id"
                             variant="solo"
                             v-model="inround"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Machine number"
                             :items="masterStore.mastervalue?.machinename"
                             item-title="name"
                             item-value="id"
                             v-model="inmachinenumber"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
 
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Jig number"
                             :items="masterStore.mastervalue?.jignumber"
                             item-title="name"
                             item-value="id"
                             v-model="injig"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
                 </v-row>
 
                 <v-row>
                     <v-col cols="3" class="colcontainer">
-                        <v-combobox
+                        <v-select
                             label="Tray number"
                             :items="masterStore.mastervalue?.traynumber"
                             item-title="name"
                             item-value="id"
                             v-model="intraynumber"
                             variant="solo"
-                            :rules="[requiredcombobox]"
-                        ></v-combobox>
+                            :rules="[rulerequiredselectObject]"
+                            v-bind="{'return-object':true}"
+                        ></v-select>
                     </v-col>
                 </v-row>
 
@@ -444,7 +451,7 @@ export default defineComponent({
                     </v-col>
 
                     <v-col cols="6" class="colcontainer">
-                        <strong>Auth. Level</strong>
+                        <strong>Remark</strong>
                         <v-text-field
                             type="remark"
                             label="Remark"
@@ -461,8 +468,8 @@ export default defineComponent({
                         variant="flat"
                         color="blue-darken-4"
                         prepend-icon="check_circle"
-                        @click="fnclick"
-                        :disabled="!valid || isLockConfirm"
+                        type="submit"
+                        :disabled=" isLockConfirm"
                     >
                         <template v-slot:prepend>
                             <v-icon color="success" type="submit"></v-icon>

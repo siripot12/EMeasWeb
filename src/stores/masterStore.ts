@@ -57,8 +57,8 @@ export const useMasterStore = defineStore('masterStore',
             let obj = this.mastervalue?.partname.find(e=>e.id == index)
             return obj != undefined? obj.name:'-'
         },
-        getprocessbyindex(index:number):string{
-            let obj = this.mastervalue?.processname.find(e=>e.id == index)
+        getprocessbyindex(idpartname:number, idprocessname:number):string{
+            let obj = this.mastervalue?.processname.find(e=>e.partnameId == idpartname && e.processId == idprocessname)
             return obj != undefined? obj.name:'-'
         },
         getmachinenumberbyindex(index:number):string{

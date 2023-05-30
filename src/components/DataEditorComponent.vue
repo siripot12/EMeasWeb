@@ -26,11 +26,22 @@ export default defineComponent({
 
         onMounted(()=>{
             data.value = {...props.data}
+            measuretype.value = masterstore.mastervalue?.measuretype.find(e=>e.id == data.value?.measuringtypeid)?.name;
+            round.value = masterstore.mastervalue?.round.find(e=>e.id == data.value?.round)?.name;
+            // @ts-ignore
+            measuringitem.value = masterstore.mastervalue?.measinstrument.find(e=>e.id == data.value?.measuringitemid)?.name;
+            console.log(masterstore.mastervalue?.measuretype)
+            console.log(data.value)
         })
 
-        const measuretype = masterstore.mastervalue?.measuretype.find(e=>e.id == data.value?.measuringtypeid)?.name;
-        const round = masterstore.mastervalue?.round.find(e=>e.id == data.value?.round)?.name;
-        const measuringitem = masterstore.mastervalue?.measinstrument.find(e=>e.id == data.value?.measuringitemid)?.name;
+        const measuretype = ref<string>();
+        const round = ref<string>();
+        const measuringitem = ref<string>();
+
+        //const measuretype = masterstore.mastervalue?.measuretype.find(e=>e.id == data.value?.measuringtypeid)?.name;
+        //const round = masterstore.mastervalue?.round.find(e=>e.id == data.value?.round)?.name;
+        //const measuringitem = masterstore.mastervalue?.measinstrument.find(e=>e.id == data.value?.measuringitemid)?.name;
+        
 
         const isSending = ref<boolean>(false);
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onMounted } from 'vue';
 import { watch } from 'vue';
 import {defineComponent, ref, type PropType} from 'vue'
 
@@ -11,11 +12,19 @@ export default defineComponent({
     emits:['onClose', 'onConfirm'],
     setup(props, {emit}){
         const pdfitems = ref<String[]>(props.items);
-        const selection = ref<number>(0);
+        const selection = ref<number|undefined>(undefined);
+        const selectpdf = ref<String>('');
+
+        watch(selection, ()=>{
+            selectpdf.value= pdfitems.value[selection.value?selection.value:0];
+        })
+
+        onMounted(()=>{
+        })
 
         const fnconfirmClick = ()=>{
-            var path = pdfitems.value[selection.value];
-            emit('onConfirm', path)
+            console.log(selectpdf.value);
+            emit('onConfirm', selectpdf.value)
         }
 
         const fnclncleClick = ()=>{
@@ -25,6 +34,7 @@ export default defineComponent({
         return{
             pdfitems,
             selection,
+            selectpdf,
             fnconfirmClick,
             fnclncleClick
         }
@@ -55,6 +65,7 @@ export default defineComponent({
                                     class="align-center"
                                     style="display: flex; flex-direction: column; justify-content: center;"
                                     :height="isSelected ? '80px' : '50px'"
+                                    :disabled="item == ''? true:false"
                                     @click="toggle"
                                 >
                                     <div v-if="isSelected" class="text-h5 text-center prevent-select">
@@ -62,7 +73,7 @@ export default defineComponent({
                                     </div>
 
                                     <div class="text-h6 text-center prevent-select" >
-                                        {{item}}
+                                        {{item==''? 'No file':item}}
                                     </div>
 
                                     <!-- <v-scroll-y-transition style="display: flex; flex-direction: column;">
@@ -88,6 +99,7 @@ export default defineComponent({
                     color="blue-darken-4"
                     prepend-icon="check_circle"
                     @click="fnconfirmClick"
+                    :disabled="selection == undefined || selectpdf == ''"
                     >
                         <template v-slot:prepend>
                             <v-icon color="success" type="submit"></v-icon>
